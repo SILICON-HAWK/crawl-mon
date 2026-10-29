@@ -1,6 +1,6 @@
 # JevScout system architecture
 
-Status: agreed architectural direction, October 29, 2026. Implementation has not started. Python and Crawlee for Python are selected; database product and application queue library selection remain open.
+Status: architecture and implementation progress, October 29, 2026. Python and Crawlee for Python are selected. The initial filesystem run-record/inspection slice is being implemented; Crawlee execution and the application queue are not implemented. PostgreSQL is the intended later backend.
 
 ### Latest deployment decision: filesystem first
 

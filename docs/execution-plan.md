@@ -1,6 +1,6 @@
 # Execution plan
 
-Status: proposed execution plan, awaiting agreement on test boundaries and remaining infrastructure choices. Planning only; no application code or tests have been written.
+Status: execution started under the user's filesystem-first override. Public run-spec/store and CLI submission/query behavior are the implemented first slice; collection, extraction, and JEV remain upcoming. Follow the filesystem-first update below before the original target-state phases.
 
 ## Filesystem-first execution update
 

@@ -6,7 +6,33 @@ JevScout discovers job listings, extracts consistent job data, and sends each jo
 
 ## Current status
 
-Project definition and planning. No crawler or model integration has been implemented yet. Official JEV documentation is verified in [JEV integration research](docs/jev-integration.md). Live API access remains untested.
+The first local slice creates and inspects filesystem-backed run requests. Python has no runtime dependencies for this slice; no database service is needed. Creating a request does **not** start or approve a crawl. Crawlee execution, extraction, and JEV integration remain next steps. Official JEV documentation is verified in [JEV integration research](docs/jev-integration.md); live API access remains untested.
+
+## Run locally
+
+From this repository root, using Python 3.11 or newer:
+
+```bash
+PYTHONPATH=src python3 -m jevscout --data-dir ./data runs create \
+  --seed https://example.com/careers --max-pages 10 --max-depth 1
+PYTHONPATH=src python3 -m jevscout --data-dir ./data runs list
+PYTHONPATH=src python3 -m jevscout --data-dir ./data runs show RUN_ID
+```
+
+Replace `RUN_ID` with the UUID returned by `create`. Success responses are JSON on stdout; diagnostics go to stderr. Put `--debug` and `--data-dir` before `runs`. An editable package install also exposes the `jevscout` command when Python packaging tools are available:
+
+```bash
+python3 -m pip install -e .
+jevscout --data-dir ./data runs list
+```
+
+Run the dependency-free behavior checks:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+```
+
+Run records and saved artifacts live under `data/`, which is excluded from Git. Use a trusted local storage directory with one writer. Filesystem persistence does not implement a shared task queue, background execution, multi-container coordination, or crash resume. PostgreSQL and a maintained queue backend are deferred. See [Changelog](CHANGELOG.md) for verified slice status and [Execution plan](docs/execution-plan.md) for remaining work.
 
 ## First version
 
@@ -30,4 +56,4 @@ Project definition and planning. No crawler or model integration has been implem
 
 ## Start here
 
-Python and Crawlee are selected. Start with CLI-driven collection, saved evidence, structured extraction, and inspection; add JEV afterward. The project is containerizable, with a focused core library, CLI/MCP/API adapters, bounded workers, persistent runs, and an optional results UI. Database and application queue library choices remain open. Target-site feasibility is validated separately.
+Python and Crawlee are selected. Start with local filesystem persistence, then CLI-driven collection, saved evidence, structured extraction, and inspection; add JEV afterward. The target architecture is containerizable, with a focused core library, CLI/MCP/API adapters, bounded workers, persistent runs, and an optional results UI. PostgreSQL is the intended later backend. Target-site feasibility is validated separately.
