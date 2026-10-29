@@ -1,5 +1,7 @@
 # Implementation roadmap
 
+Historical job-focused roadmap. The current [Execution plan](execution-plan.md) supersedes its ordering and open-decision table: Python/Crawlee and CLI-first collection are settled, JEV follows collection, and Indeed/Naukri feasibility is a separate workstream. Refer to [System architecture](system-architecture.md) for confirmed decisions.
+
 ## 1. Confirm inputs and interfaces
 
 - Use the verified [JEV integration research](jev-integration.md) and test an authenticated request.

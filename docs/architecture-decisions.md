@@ -66,6 +66,8 @@ Separate code boundaries do not require separate network services. Worker startu
 
 ## Scope clarification
 
+Latest storage override: filesystem-backed local records and artifacts now; PostgreSQL later due hardware constraints. The initial slice is single-process and does not implement an application queue or distributed worker guarantees. Keep storage replaceable. Maintain a project changelog and handoff, collect bounded subagent change notes, and commit verified usable slices regularly.
+
 Python, a collection-first milestone, and separate Indeed/Naukri feasibility validation are confirmed. First prove CLI submission, scoped collection, saved evidence, structured extraction, and inspection; add JEV afterward. Controlled fixtures support reliable development independently of live source availability. See [Complete system overview](system-overview.md) for the consolidated diagrams.
 
 Existing job-focused documents describe an initial use case, not the boundary of the core system. Job preferences, detailed schemas, stack choices, and implementation steps are deferred. All project documentation belongs under `/home/abhi/work/jevscout`.

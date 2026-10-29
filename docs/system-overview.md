@@ -1,5 +1,7 @@
 # Complete system overview
 
+Implementation update: the first low-resource backend uses local filesystem records and artifacts with a single process. Database-backed queues and multi-container workers in these diagrams are the later target architecture. PostgreSQL is deferred; no custom shared file queue is planned. See [Changelog](../CHANGELOG.md).
+
 This is the target architecture, not a claim that components are implemented. Python, Crawlee, the collection-first milestone, and separate target-source feasibility checks are confirmed. Database product and application queue library remain unselected. All application components initially run on one machine; subgraphs are module boundaries, not mandatory microservices or containers.
 
 ## Entire system in one graph

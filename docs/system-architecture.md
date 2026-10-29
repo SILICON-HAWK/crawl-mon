@@ -2,6 +2,10 @@
 
 Status: agreed architectural direction, October 29, 2026. Implementation has not started. Python and Crawlee for Python are selected; database product and application queue library selection remain open.
 
+### Latest deployment decision: filesystem first
+
+The user selected ordinary filesystem persistence for current hardware constraints. PostgreSQL is the intended later backend. This supersedes requiring a database/application queue in the initial implementation and the target-state diagrams below. Begin with one local execution process, atomic metadata files and saved artifacts behind a storage adapter. There is no shared file queue or multi-writer guarantee. Background workers, distributed claiming, and multi-container recovery remain target-state capabilities, deferred until a maintained queue/backend is adopted. Initial CLI submission records pending requests; it does not execute or imply approval of a crawl. Track implementation status in [Changelog](../CHANGELOG.md).
+
 See [Complete system overview](system-overview.md) for the entire design in one graph and an end-to-end sequence diagram.
 
 The confirmed first milestone is collection through the CLI, saved source evidence, structured extraction, and result inspection. JEV integration follows collection. Indeed/Naukri access feasibility is evaluated separately so the core can be developed against controlled fixtures without assuming target-site access.

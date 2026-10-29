@@ -18,6 +18,7 @@ Project definition and planning. No crawler or model integration has been implem
 
 ## Documentation
 
+- [Execution plan](docs/execution-plan.md): implementation slices, test boundaries, decision gates, and scoped delegation.
 - [Complete system overview](docs/system-overview.md): full architecture graph with subgraphs and an end-to-end sequence diagram.
 - [System architecture](docs/system-architecture.md): consolidated architecture with component, pipeline, worker, approval, and results diagrams.
 - [Architecture decisions](docs/architecture-decisions.md): confirmed general-purpose design and open choices; takes precedence over earlier job-focused proposals.
