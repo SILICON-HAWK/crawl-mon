@@ -23,6 +23,8 @@ These documented interfaces fetch jobs for known employers. They do not establis
 
 Public technical access does not establish blanket reuse permission. Source and employer terms still need review for the selected collection and display behavior.
 
+See [Browserless Career Feeds (India & Global)](career-site-feeds.md) for detailed endpoint schemas, India tech usage, and location filtering rules across Greenhouse, Lever, Ashby, SmartRecruiters, and developer feeds.
+
 ## Session state
 
 The first grilling round is awaiting user answers on intended users, target roles/locations, qualification versus preference fit, discovery breadth, and success criteria. Recommendations are provisional; no answers or implementation choices have been assumed.
