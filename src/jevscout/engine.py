@@ -19,11 +19,15 @@ class PageEvidence:
 class CollectionReport:
     pages_saved: int = 0
     failed_requests: int = 0
+    failures: list[dict] = field(default_factory=list)
     candidates: list[str] = field(default_factory=list)
     limit_reached: bool = False
 
 
 class CollectionEngine(Protocol):
+    name: str
+    version: str
+
     async def collect(
         self,
         spec: RunSpec,

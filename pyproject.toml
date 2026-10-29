@@ -4,10 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jevscout"
-version = "0.1.0"
+version = "0.2.0"
 description = "Modular collection and classification with inspectable local runs"
 requires-python = ">=3.11"
 dependencies = []
+
+[project.optional-dependencies]
+crawl = [
+    "crawlee[beautifulsoup,httpx]==1.11.0",
+    "httpx2==2.16.0",
+    "httpcore2==2.16.0",
+]
 
 [project.scripts]
 jevscout = "jevscout.cli:main"

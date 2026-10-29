@@ -57,6 +57,23 @@ class ParseJobsTests(unittest.TestCase):
         self.assertIsNone(jobs[0]["application_url"])
         self.assertEqual(jobs[1]["application_url"], "https://careers.example.test/jobs")
 
+    def test_rejects_malformed_provided_urls_without_falling_back_to_source(self):
+        html = r'''
+        <script type="application/ld+json">
+          [
+            {"@type":"JobPosting","title":"Bad port","url":"https://jobs.example.test:bad/apply"},
+            {"@type":"JobPosting","title":"Out of range","url":"https://jobs.example.test:65536/apply"},
+            {"@type":"JobPosting","title":"Backslash","url":"https://jobs.example.test\\evil"},
+            {"@type":"JobPosting","title":"Control","url":"https://jobs.example.test/\u0001apply"}
+          ]
+        </script>
+        '''
+
+        jobs = parse_jobs(html, "https://careers.example.test/jobs", "page-8")
+
+        self.assertEqual(len(jobs), 4)
+        self.assertTrue(all(job["application_url"] is None for job in jobs))
+
 
 if __name__ == "__main__":
     unittest.main()

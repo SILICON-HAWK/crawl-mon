@@ -6,7 +6,7 @@ JevScout discovers job listings, extracts consistent job data, and sends each jo
 
 ## Current status
 
-The first local slice creates and inspects filesystem-backed run requests. Python has no runtime dependencies for this slice; no database service is needed. Creating a request does **not** start or approve a crawl. Crawlee execution, extraction, and JEV integration remain next steps. Official JEV documentation is verified in [JEV integration research](docs/jev-integration.md); live API access remains untested.
+The local collection slice creates a run, collects pages through Crawlee, saves evidence, extracts JSON-LD JobPosting records, and exposes results through the CLI. Storage is ordinary local files; no database service is needed. Creating a request does **not** start or approve a crawl. Execution is synchronous and explicitly approved through the calling host. JEV, browser login, and Indeed/Naukri adapters are not implemented. See [the runnable collection example](docs/local-collection.md).
 
 ## Run locally
 
@@ -34,6 +34,15 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 Run records and saved artifacts live under `data/`, which is excluded from Git. Use a trusted local storage directory with one writer. Filesystem persistence does not implement a shared task queue, background execution, multi-container coordination, or crash resume. PostgreSQL and a maintained queue backend are deferred. See [Changelog](CHANGELOG.md) for verified slice status and [Execution plan](docs/execution-plan.md) for remaining work.
 
+Install the optional HTTP collection dependency set and run all collection checks:
+
+```bash
+python3 -m pip install -e '.[crawl]'
+python3 -m unittest discover -s tests -v
+```
+
+Use a virtual environment for package installation. Core record/query/parser operations remain dependency-free; collection tests are skipped when the optional Crawlee extra is absent. No browser downloads or database are required for this HTTP-only slice.
+
 ## First version
 
 - Crawl a small, configured set of public job sources.
@@ -44,6 +53,7 @@ Run records and saved artifacts live under `data/`, which is excluded from Git. 
 
 ## Documentation
 
+- [Local collection walkthrough](docs/local-collection.md): runnable fixture, inspection, offline extraction, and current limits.
 - [Execution plan](docs/execution-plan.md): implementation slices, test boundaries, decision gates, and scoped delegation.
 - [Complete system overview](docs/system-overview.md): full architecture graph with subgraphs and an end-to-end sequence diagram.
 - [System architecture](docs/system-architecture.md): consolidated architecture with component, pipeline, worker, approval, and results diagrams.

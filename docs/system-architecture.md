@@ -1,10 +1,10 @@
 # JevScout system architecture
 
-Status: architecture and implementation progress, October 29, 2026. Python and Crawlee for Python are selected. The initial filesystem run-record/inspection slice is being implemented; Crawlee execution and the application queue are not implemented. PostgreSQL is the intended later backend.
+Status: architecture and implementation progress, October 29, 2026. Python and Crawlee for Python are selected. Local synchronous HTTP collection, saved evidence, JSON-LD extraction, and CLI inspection/replay are implemented. The application queue and background workers are not implemented. PostgreSQL is the intended later backend. See [Local collection](local-collection.md) for runnable commands and tested limits.
 
 ### Latest deployment decision: filesystem first
 
-The user selected ordinary filesystem persistence for current hardware constraints. PostgreSQL is the intended later backend. This supersedes requiring a database/application queue in the initial implementation and the target-state diagrams below. Begin with one local execution process, atomic metadata files and saved artifacts behind a storage adapter. There is no shared file queue or multi-writer guarantee. Background workers, distributed claiming, and multi-container recovery remain target-state capabilities, deferred until a maintained queue/backend is adopted. Initial CLI submission records pending requests; it does not execute or imply approval of a crawl. Track implementation status in [Changelog](../CHANGELOG.md).
+The user selected ordinary filesystem persistence for current hardware constraints. PostgreSQL is the intended later backend. This supersedes requiring a database/application queue in the initial implementation and the target-state diagrams below. Use one local execution process, atomic metadata files and saved artifacts behind a storage adapter. There is no shared file queue or multi-writer guarantee. Background workers, distributed claiming, and multi-container recovery remain target-state capabilities, deferred until a maintained queue/backend is adopted. CLI submission records pending requests; `runs execute --approve` starts synchronous collection under host-delegated authorization. Track implementation status in [Changelog](../CHANGELOG.md).
 
 See [Complete system overview](system-overview.md) for the entire design in one graph and an end-to-end sequence diagram.
 

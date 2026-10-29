@@ -124,16 +124,21 @@ def _location(value: object) -> str | None:
 
 
 def _safe_url(value: object, source_url: str) -> str | None:
-    candidate = _text(value)
-    if not candidate:
+    if not isinstance(value, str) or not value:
+        return None
+    if any(
+        char.isspace() or char == "\\" or ord(char) < 32 or 127 <= ord(char) <= 159
+        for char in value
+    ):
         return None
     try:
-        resolved = urljoin(source_url, candidate)
+        resolved = urljoin(source_url, value)
         parsed = urlsplit(resolved)
         if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
             return None
         if parsed.username is not None or parsed.password is not None:
             return None
+        parsed.port  # Access validates malformed and out-of-range ports.
         return resolved
     except ValueError:
         return None
@@ -148,7 +153,7 @@ def _record(posting: dict[str, object], source_url: str, artifact_ref: str) -> d
     company = _text(organization.get("name")) if isinstance(organization, dict) else None
 
     application_url = _safe_url(posting.get("url"), source_url)
-    if application_url is None and not _text(posting.get("url")):
+    if "url" not in posting:
         application_url = _safe_url(source_url, source_url)
 
     return {

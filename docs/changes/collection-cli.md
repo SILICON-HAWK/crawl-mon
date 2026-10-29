@@ -1,0 +1,9 @@
+# Collection application and CLI integration
+
+The coordinator integrated the delegated parser, result storage, and Crawlee adapter into a synchronous local run service. The CLI now exposes execute, pages, results, artifact, report, and offline extract commands. Execution requires an explicit host-delegated approval assertion, pins the effective run specification, records progress, and only accepts pending runs. Core operations depend on an application-owned storage/engine protocol.
+
+The first real CLI test was RED before the allow-local flag and execution commands existed. The happy path then collected two pages and extracted two independently specified JobPosting records, followed by offline evidence inspection and re-extraction. Further real-process tests exposed false success on timeout/SIGINT because Crawlee consumed cancellation internally. The engine adapter was corrected and CLI cancellation handling now exits 130. A separate RED test exposed extraction failure inside timeout cleanup leaving a run running; cleanup now records a terminal partial failure without exposing the exception data.
+
+The lifecycle checks exercise explicit approval refusal with zero requests, refusal to recollect completed runs, partial results after two failed 503 attempts, timeout status, SIGINT state/lock release, and debug output without raw source URLs. The application corruption test uses an external engine fixture and saved-data boundary, not mocks of internal collaborators.
+
+See the final milestone entry in `CHANGELOG.md` for integrated check totals and package/demo verification. Current limits are documented in `docs/local-collection.md`: no background queue, browser/auth, target-board adapters, JEV, SIGKILL resume, or production response-size limit. Local-only operation locking is POSIX/WSL; dependency-free record/query/parser commands remain separate from optional collection imports.
