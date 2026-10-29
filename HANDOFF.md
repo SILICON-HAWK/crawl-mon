@@ -10,6 +10,8 @@
 
 ## Current task and stopping point
 
+An active user goal now authorizes finishing a sensible collection-first end-to-end slice. Foundation work adds JobPosting JSON-LD extraction, versioned result/execution persistence, a local operation lock, and explicit loopback-fixture permission. Crawlee 1.11.0 is installed locally as an optional extra. The real-CLI happy path has passed, including re-extraction after the fixture server stops. Integration work remains active: timeout/Ctrl+C checks exposed Crawlee swallowing cancellation and must be fixed and verified before marking completion. Read the latest changelog and test output; do not mistake foundation commits for full milestone completion.
+
 Implementation has begun with a zero-runtime-dependency Python package, filesystem run/artifact storage, and CLI pending-run create/show/list. Creating a record does not approve or execute a crawl. Read `CHANGELOG.md` and `docs/changes/` for behavior, test evidence, and limitations. Do not return to job-profile questions prematurely.
 
 Since the original handoff, Python and Crawlee for Python were selected. The crawler is embedded behind a replaceable adapter; it owns its URL frontier and request retries, while JevScout schedules crawl-session and downstream processing tasks. Modularity means focused code changes, not runtime hot-swapping. Indeed and Naukri are initial target adapters whose access feasibility remains unverified. Manual login/profile reuse is planned; an optional browser console is proposed.

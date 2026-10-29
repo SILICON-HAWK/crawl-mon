@@ -31,8 +31,11 @@ class RunSpec:
     max_pages: int = 10
     max_depth: int = 1
     timeout_seconds: int = 60
+    allow_local: bool = False
 
     def __post_init__(self) -> None:
+        if not isinstance(self.allow_local, bool):
+            raise ValueError("allow_local must be boolean")
         if not isinstance(self.seed_urls, list) or not self.seed_urls:
             raise ValueError("seed_urls must be a non-empty list")
         for url in self.seed_urls:
@@ -54,13 +57,14 @@ class RunSpec:
             "max_pages": self.max_pages,
             "max_depth": self.max_depth,
             "timeout_seconds": self.timeout_seconds,
+            "allow_local": self.allow_local,
         }
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "RunSpec":
         if not isinstance(payload, dict):
             raise TypeError("run spec must be an object")
-        allowed = {"seed_urls", "max_pages", "max_depth", "timeout_seconds"}
+        allowed = {"seed_urls", "max_pages", "max_depth", "timeout_seconds", "allow_local"}
         unknown = payload.keys() - allowed
         if unknown:
             raise ValueError(f"unknown run spec fields: {', '.join(sorted(unknown))}")

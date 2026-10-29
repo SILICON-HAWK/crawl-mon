@@ -1,12 +1,14 @@
 """Single-process filesystem persistence for run metadata and saved pages."""
 
+import errno
 import hashlib
 import json
 import os
 import tempfile
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from .models import RunRecord, RunSpec
 
@@ -149,3 +151,95 @@ class FileRunStore:
         page_key = self._safe_artifact_ref(ref)
         path = self._run_dir(run_id) / "pages" / f"{page_key}.html"
         return path.read_text(encoding="utf-8")
+
+    def engine_workspace(self, run_id: str) -> Path:
+        """Return an isolated, storage-owned working directory for one run."""
+        self.get(run_id)
+        workspace = self._run_dir(run_id) / "engine"
+        workspace.mkdir(mode=0o700, exist_ok=True)
+        return workspace.resolve()
+
+    @staticmethod
+    def _validate_json_object(payload: object, name: str) -> dict[str, Any]:
+        if not isinstance(payload, dict):
+            raise TypeError(f"{name} must be an object")
+        # Validate before touching the destination; _atomic_json is shared with
+        # older metadata files and retains its existing behavior.
+        json.dumps(payload, ensure_ascii=False, allow_nan=False)
+        return payload
+
+    def write_execution(self, run_id: str, payload: dict) -> None:
+        self.get(run_id)
+        valid_payload = self._validate_json_object(payload, "execution payload")
+        self._atomic_json(self._run_dir(run_id) / "execution.json", valid_payload)
+
+    def read_execution(self, run_id: str) -> dict | None:
+        self.get(run_id)
+        path = self._run_dir(run_id) / "execution.json"
+        if not path.is_file():
+            return None
+        with path.open("r", encoding="utf-8") as source:
+            payload = json.load(source)
+        return self._validate_json_object(payload, "stored execution payload")
+
+    def save_results(self, run_id: str, items: list[dict]) -> None:
+        self.get(run_id)
+        if not isinstance(items, list):
+            raise TypeError("results must be a list")
+        if any(not isinstance(item, dict) for item in items):
+            raise TypeError("each result must be an object")
+        document = {
+            "schema_version": 1,
+            "parser_version": "jsonld-jobs-v1",
+            "items": items,
+        }
+        json.dumps(document, ensure_ascii=False, allow_nan=False)
+        self._atomic_json(self._run_dir(run_id) / "results.json", document)
+
+    def list_results(self, run_id: str) -> list[dict]:
+        self.get(run_id)
+        path = self._run_dir(run_id) / "results.json"
+        if not path.is_file():
+            return []
+        with path.open("r", encoding="utf-8") as source:
+            document = json.load(source)
+        if (
+            not isinstance(document, dict)
+            or document.get("schema_version") != 1
+            or document.get("parser_version") != "jsonld-jobs-v1"
+            or not isinstance(document.get("items"), list)
+            or any(not isinstance(item, dict) for item in document["items"])
+        ):
+            raise ValueError("stored results have an invalid format")
+        return document["items"]
+
+    @contextmanager
+    def operation_lock(self) -> Iterator[None]:
+        """Exclude another local operation using a nonblocking advisory lock."""
+        try:
+            import fcntl
+        except ImportError as exc:
+            raise RuntimeError("operation locking is unsupported on this platform") from exc
+
+        descriptor = None
+        acquired = False
+        try:
+            try:
+                descriptor = os.open(
+                    self.root / ".operation.lock", os.O_CREAT | os.O_RDWR, 0o600
+                )
+                os.fchmod(descriptor, 0o600)
+                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                acquired = True
+            except OSError as exc:
+                if exc.errno in {errno.EAGAIN, errno.EACCES}:
+                    raise RuntimeError("another local operation is active") from exc
+                raise RuntimeError("operation locking is unavailable on this platform") from exc
+            yield
+        finally:
+            if descriptor is not None:
+                try:
+                    if acquired:
+                        fcntl.flock(descriptor, fcntl.LOCK_UN)
+                finally:
+                    os.close(descriptor)

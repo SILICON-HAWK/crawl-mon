@@ -22,6 +22,7 @@ def invoke(data_dir: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
         text=True,
         capture_output=True,
         check=False,
+        timeout=30,
     )
 
 
@@ -55,6 +56,7 @@ class CliTests(unittest.TestCase):
                     "max_pages": 7,
                     "max_depth": 2,
                     "timeout_seconds": 45,
+                    "allow_local": False,
                 },
             )
             self.assertEqual(record["status"], "pending")

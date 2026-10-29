@@ -18,6 +18,7 @@ class RunSpecTests(unittest.TestCase):
                 "max_pages": 25,
                 "max_depth": 3,
                 "timeout_seconds": 120,
+                "allow_local": False,
             },
         )
         self.assertEqual(RunSpec.from_dict(spec.to_dict()), spec)

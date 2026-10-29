@@ -2,6 +2,15 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Collection foundations — 2026-10-29
+
+- Added pure JSON-LD JobPosting extraction from saved HTML, including arrays and `@graph`, explicit unknown fields, HTML description cleanup, and source/artifact provenance.
+- Added versioned result sets, execution reports, run-isolated engine workspaces, and a nonblocking local operation lock. Replaced neither the application queue nor distributed coordination with files.
+- Added an explicit persisted `allow_local` flag for loopback fixture collection; existing run documents default it to false.
+- Defined the framework-independent collection interface. Real Crawlee execution/CLI integration is in progress and is not part of this foundation checkpoint.
+
+Verification: 13 storage, 4 CLI-regression, 4 result-storage, 2 parser, and 2 scope checks pass (25 checks across targeted commands). Agent notes: `job-extraction.md`, `result-storage.md`. No live sources or JEV calls used.
+
 ## 0.1.0 — Filesystem run requests — 2026-10-29
 
 - Added a Python package and CLI for creating, listing, and inspecting pending run requests with JSON output. No runtime dependencies or database server are required.
