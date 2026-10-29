@@ -1,5 +1,7 @@
 # Architecture and data
 
+This document retains the earlier job-module data proposal. For the agreed general-purpose system architecture and diagrams, see [System architecture](system-architecture.md), which takes precedence over this proposal.
+
 ## Proposed pipeline
 
 ```mermaid

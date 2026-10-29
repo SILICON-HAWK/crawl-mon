@@ -2,6 +2,8 @@
 
 Working decisions from the architecture grilling session. Architecture is being settled before job-specific requirements or implementation. No implementation is authorized by this record.
 
+The consolidated design and diagrams are in [System architecture](system-architecture.md).
+
 ## Confirmed
 
 - Build a general web crawler with target-specific modules; job collection is the first use case.
@@ -33,9 +35,23 @@ Separate code boundaries do not require separate network services. Worker startu
 ## Next architecture decisions
 
 - Approval is bound to exact structured inputs; the detailed trusted approval interaction remains to be designed.
-- How approved background execution is bounded, including handling discoveries that expand source scope.
+- Exact mechanisms for enforcing shared budgets and approved execution scope.
 - Select the core language and durable queue implementation after reviewing tradeoffs.
-- What data flows between stages and what modules can customize.
+- Detailed schemas and compatibility rules for persisted stage outputs and module interfaces.
+
+## Confirmed pipeline and worker boundaries
+
+- Use a maintained database-backed queue library. Choose the implementation after selecting the core language; do not implement a custom queue engine.
+- A run represents one approved request. Tasks are smaller execution units within that run, created as discovery and stage outputs become available.
+- Persist task status and retry history independently. Retry failed stages using saved upstream outputs; permit partial results and aggregate progress at run level.
+- All generated tasks remain within their parent run's approved scope and shared resource limits.
+- Target-specific modules define discovery strategies, extraction schemas, and classification rules through explicit extension points. Shared machinery handles fetching, execution, storage, limits, and logging.
+- Tasks declare required worker capabilities. Workers claim only tasks they support.
+- Start with one worker process supporting implemented capabilities; separate HTTP, browser, extraction, or JEV workers later if useful. Capability separation does not require separate services initially.
+- Worker count does not multiply approved concurrency, crawl, or model budgets; limits apply across the pool.
+- Modules select standard stages; allow fetch-only, extraction from saved pages, and reclassification from saved items when valid inputs exist. Arbitrary workflow graphs are deferred.
+- Stage handoffs use references to persisted outputs with producing task, schema, version, and provenance.
+- Automatically follow discovered links only within the approved boundaries and remaining budget. Outside-scope discoveries are candidates for separately approved runs.
 
 ## Scope clarification
 

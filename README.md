@@ -18,6 +18,7 @@ Project definition and planning. No crawler or model integration has been implem
 
 ## Documentation
 
+- [System architecture](docs/system-architecture.md): consolidated architecture with component, pipeline, worker, approval, and results diagrams.
 - [Architecture decisions](docs/architecture-decisions.md): confirmed general-purpose design and open choices; takes precedence over earlier job-focused proposals.
 - [JEV integration research](docs/jev-integration.md): verified model capabilities and API documentation.
 - [Job-source research](docs/job-source-research.md): public collection interfaces and discovery limitations.
