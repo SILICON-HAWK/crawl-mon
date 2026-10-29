@@ -18,6 +18,7 @@ Project definition and planning. No crawler or model integration has been implem
 
 ## Documentation
 
+- [Complete system overview](docs/system-overview.md): full architecture graph with subgraphs and an end-to-end sequence diagram.
 - [System architecture](docs/system-architecture.md): consolidated architecture with component, pipeline, worker, approval, and results diagrams.
 - [Architecture decisions](docs/architecture-decisions.md): confirmed general-purpose design and open choices; takes precedence over earlier job-focused proposals.
 - [JEV integration research](docs/jev-integration.md): verified model capabilities and API documentation.
@@ -28,4 +29,4 @@ Project definition and planning. No crawler or model integration has been implem
 
 ## Start here
 
-Finish the architecture discussion before selecting the implementation stack and job-specific settings. The project is containerizable, with a focused core library, CLI/MCP/API adapters, bounded workers, persistent runs, and an optional results UI. No technology stack has been selected.
+Python and Crawlee are selected. Start with CLI-driven collection, saved evidence, structured extraction, and inspection; add JEV afterward. The project is containerizable, with a focused core library, CLI/MCP/API adapters, bounded workers, persistent runs, and an optional results UI. Database and application queue library choices remain open. Target-site feasibility is validated separately.

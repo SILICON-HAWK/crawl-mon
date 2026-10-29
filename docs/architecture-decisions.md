@@ -36,7 +36,7 @@ Separate code boundaries do not require separate network services. Worker startu
 
 - Approval is bound to exact structured inputs; the detailed trusted approval interaction remains to be designed.
 - Exact mechanisms for enforcing shared budgets and approved execution scope.
-- Select the core language and durable queue implementation after reviewing tradeoffs.
+- Select the durable queue implementation for the confirmed Python runtime after reviewing tradeoffs.
 - Detailed schemas and compatibility rules for persisted stage outputs and module interfaces.
 
 ## Confirmed pipeline and worker boundaries
@@ -53,6 +53,19 @@ Separate code boundaries do not require separate network services. Worker startu
 - Stage handoffs use references to persisted outputs with producing task, schema, version, and provenance.
 - Automatically follow discovered links only within the approved boundaries and remaining budget. Outside-scope discoveries are candidates for separately approved runs.
 
+## Crawlee and modular engine integration
+
+- Select Python and Crawlee for Python as the initial integrated engine, installed as a dependency and wrapped behind a small application-owned adapter interface.
+- Supersede mandatory per-URL application jobs: schedule bounded crawl sessions externally, reuse Crawlee's internal URL queue/retries, and persist individual page outcomes. Extraction and JEV remain separate stages/tasks.
+- Keep core/public contracts independent of Crawlee types. Permit multiple engine adapters and per-session selection without adopting microservices.
+- Modularity means focused component updates without rewriting unrelated application code. Runtime hot-swapping/live migration is not required; ordinary rebuilds and restarts are acceptable. Maintain explicit contracts and persisted-data compatibility.
+- Keep source-specific navigation and parsing in adapters, with pure parsing independent of the engine where practical.
+- Support manual login and protected profile reuse. Account profiles need exclusive ownership; crawl checkpoints do not substitute for authentication persistence.
+- Prioritize Indeed and Naukri source adapters, subject to verified access feasibility. Source support is not implemented yet.
+- A browser-based remote console for container login is proposed using noVNC; desktop headful login is an alternative. Exact implementation remains open.
+
 ## Scope clarification
+
+Python, a collection-first milestone, and separate Indeed/Naukri feasibility validation are confirmed. First prove CLI submission, scoped collection, saved evidence, structured extraction, and inspection; add JEV afterward. Controlled fixtures support reliable development independently of live source availability. See [Complete system overview](system-overview.md) for the consolidated diagrams.
 
 Existing job-focused documents describe an initial use case, not the boundary of the core system. Job preferences, detailed schemas, stack choices, and implementation steps are deferred. All project documentation belongs under `/home/abhi/work/jevscout`.

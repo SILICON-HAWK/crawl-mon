@@ -1,6 +1,10 @@
 # JevScout system architecture
 
-Status: agreed architectural direction, October 29, 2026. Implementation has not started. This document is the primary system architecture; language, database product, and queue library selection remain open.
+Status: agreed architectural direction, October 29, 2026. Implementation has not started. Python and Crawlee for Python are selected; database product and application queue library selection remain open.
+
+See [Complete system overview](system-overview.md) for the entire design in one graph and an end-to-end sequence diagram.
+
+The confirmed first milestone is collection through the CLI, saved source evidence, structured extraction, and result inspection. JEV integration follows collection. Indeed/Naukri access feasibility is evaluated separately so the core can be developed against controlled fixtures without assuming target-site access.
 
 ## Purpose and deployment boundary
 
@@ -97,6 +101,60 @@ Detailed record schemas and lifecycle status names are implementation decisions.
 
 Use a maintained database-backed queue library rather than writing a queue engine. Choose the library after selecting the core language. PostgreSQL is the current recommendation, not a finalized product choice.
 
+### Crawling engine ownership: updated decision
+
+Embed Crawlee as a dependency behind a JevScout engine adapter. Reuse its integrated crawling machinery rather than assembling fetchers into a custom crawler. This supersedes interpreting every discovered URL as a separately leased application task in the earlier task diagram. Page outcomes remain individually persisted and inspectable.
+
+The application queue owns bounded crawl-session tasks and downstream extraction/JEV tasks. Crawlee owns each session's URL frontier, duplicate-request filtering, request scheduling, browser/session lifecycle, and bounded request retries. JevScout owns approval, run lifecycle, global budgets, artifact provenance, and session-level recovery. Coordinate retry budgets across layers rather than multiplying attempts. Exact recovery and strict global accounting require an integration prototype.
+
+```mermaid
+flowchart TD
+    Core[Core library] --> Jobs[(Application queue)]
+    Jobs --> Worker[Managed worker]
+    Worker --> Port[Engine interface]
+    Port --> Crawlee[Crawlee adapter: initial engine]
+    Port -.-> Other[Alternative engine adapter: future]
+    Source[Source-specific navigation and parsing] --> Crawlee
+    Crawlee --> URLs[Engine-owned URL frontier and retries]
+    URLs --> Pages[(Saved page outcomes and artifacts)]
+    Pages --> Extract[Extraction tasks]
+    Extract --> Eval[JEV evaluation tasks]
+```
+
+### Replaceable engines in a modular application
+
+Keep Crawlee objects/imports out of the core domain and public CLI/MCP/API contracts. Define small application-owned request, artifact, progress, error, and capability contracts. The adapter translates between these and framework-specific types. An engine registry selects a configured adapter for new crawl sessions; multiple implementations may coexist without requiring separate services.
+
+Source integrations define navigation, pagination, recognition, and parsing. Keep pure parsing on saved HTML/data independent of Crawlee where practical. Browser interactions can be engine-specific and must declare that requirement; do not hide every possible browser operation behind an elaborate universal API.
+
+The user's intent is change isolation: updating or replacing one component should require focused changes to that component and its adapter, not a rewrite of the application. Runtime hot-swapping, live migration, and zero-downtime replacement are not requirements. Ordinary rebuilds and restarts are acceptable. Keep contracts small and explicit, and version persisted data/configuration where compatibility matters. Engine-specific checkpoint formats are not assumed portable.
+
+### Authentication and interactive browser access
+
+Crawlee uses Playwright for browser-backed sessions. Support user-assisted authentication and reuse of protected browser profiles where source access permits it. Login state and crawl checkpoint state are separate persistent resources. Give each account profile an exclusive active owner; never mount one live browser profile into multiple workers concurrently. Session expiration should pause affected work for user reauthentication rather than trigger unbounded login retries.
+
+For desktop use, open a local headful browser. For container-only use, a proposed optional browser console streams the container's headful browser into the user's web browser using a virtual display, VNC, and noVNC. This is remote display/control of a real browser, not an iframe containing the target website. noVNC is a proposed implementation, not a selected dependency yet.
+
+```mermaid
+flowchart LR
+    User[User browser: optional console] --> Console[noVNC and WebSocket gateway]
+    Console --> Display[VNC server and virtual display]
+    Display --> Browser[Headful Chromium in worker environment]
+    Browser --> Site[Source login page]
+    Browser --> Profile[(Protected persistent browser profile)]
+    Profile --> Session[Crawlee session under exclusive ownership]
+```
+
+During manual login, automation yields control; resume after verifying the session is ready. Expose the console only locally initially, protect access to it, and do not log credentials, cookies, or login screenshots. Container/browser setup must preserve appropriate browser isolation rather than disabling its sandbox merely for convenience. Console/profile attachment and exact pause/resume hooks remain to be tested.
+
+Sources: [Crawlee Playwright options](https://crawlee.dev/python/api/class/PlaywrightCrawler), [Playwright authentication](https://playwright.dev/python/docs/auth), [noVNC](https://github.com/novnc/noVNC), [Playwright container guidance](https://playwright.dev/python/docs/docker).
+
+### Initial source targets
+
+Indeed and Naukri are the first requested source-adapter targets. This is a prioritization decision, not a claim of verified automated access or implemented support. Validate supported access methods and representative pages before promising coverage. Indeed's terms condition automated access and permitted crawling; Naukri's access terms and routes remain unverified in this research. Manual authentication does not establish automated-access permission. Keep search discovery and employer career-page collection as distinct adapters alongside board-specific integrations.
+
+Reference: [Indeed terms](https://www.indeed.com/legal). No source collection has been implemented or exercised.
+
 ```mermaid
 flowchart LR
     subgraph Machine[One machine]
@@ -184,10 +242,11 @@ Persist task status and attempt history for inspection after restarts. Durable e
 
 ## Deferred decisions
 
-- Core language, database product, queue library, crawler/browser libraries, and packaging details.
+- Database product, Python application queue library, dependency versions, and packaging details.
 - Exact module interfaces, record schemas, validation contracts, and compatibility rules.
 - Queue recovery, cancellation, shutdown, duplicate-attempt handling, and shared-budget implementation.
 - Trusted approval interaction and host-delegated integration details.
 - Artifact retention/deletion policies and detailed UI implementation.
 - Remote connections/authentication, arbitrary workflow graphs, and specialized worker deployments.
-- Job-specific sources, user preferences, and scoring weights, addressed step by step after the core architecture.
+- Indeed/Naukri access feasibility and adapter details; user preferences and scoring weights remain deferred.
+- Optional interactive browser console implementation and integration with session ownership and pause/resume.
