@@ -1,0 +1,112 @@
+[
+  {
+    "id": "breezy-101",
+    "name": "Senior Cloud Infrastructure Engineer",
+    "url": "https://acme.breezy.hr/p/breezy-101",
+    "published_date": "2026-10-25T10:00:00.000Z",
+    "department": "Infrastructure",
+    "type": {
+      "id": "full_time",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "id": "IN",
+        "name": "India"
+      },
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "is_remote": false,
+      "name": "Bengaluru, Karnataka, India"
+    },
+    "description": "<div><p>Lead multi-region AWS cloud infra in Bangalore.</p></div>"
+  },
+  {
+    "id": "breezy-102",
+    "name": "Backend Golang Engineer",
+    "url": "https://acme.breezy.hr/p/breezy-102",
+    "published_date": "2026-10-26T11:00:00.000Z",
+    "department": "Engineering",
+    "type": {
+      "id": "full_time",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "id": "IN",
+        "name": "India"
+      },
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "is_remote": false,
+      "name": "Hyderabad, Telangana"
+    },
+    "description": "<div><p>Build real-time microservices in Hyderabad.</p></div>"
+  },
+  {
+    "id": "breezy-103",
+    "name": "Full Stack Engineer (Remote)",
+    "url": "https://acme.breezy.hr/p/breezy-103",
+    "published_date": "2026-10-27T12:00:00.000Z",
+    "department": "Engineering",
+    "type": {
+      "id": "full_time",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "id": "IN",
+        "name": "India"
+      },
+      "city": "",
+      "state": "",
+      "is_remote": true,
+      "name": "India - Remote"
+    },
+    "description": "<div><p>Work remotely across India.</p></div>"
+  },
+  {
+    "id": "breezy-104",
+    "name": "Austin Sales Lead",
+    "url": "https://acme.breezy.hr/p/breezy-104",
+    "published_date": "2026-10-24T08:00:00.000Z",
+    "department": "Sales",
+    "type": {
+      "id": "full_time",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "id": "US",
+        "name": "United States"
+      },
+      "city": "Austin",
+      "state": "TX",
+      "is_remote": false,
+      "name": "Austin, TX, United States"
+    },
+    "description": "<div><p>US regional sales lead.</p></div>"
+  },
+  {
+    "id": "breezy-105",
+    "name": "US Remote Recruiter",
+    "url": "https://acme.breezy.hr/p/breezy-105",
+    "published_date": "2026-10-23T08:00:00.000Z",
+    "department": "HR",
+    "type": {
+      "id": "full_time",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "id": "US",
+        "name": "United States"
+      },
+      "city": "",
+      "state": "",
+      "is_remote": true,
+      "name": "Remote (US Only)"
+    },
+    "description": "<div><p>US only recruiting.</p></div>"
+  }
+]

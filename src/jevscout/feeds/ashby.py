@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from jevscout.extraction import _safe_url, _text
 from jevscout.feeds.location import is_india_eligible, normalize_india_location
+from jevscout.feeds.quality import sanitize_description
+
+logger = logging.getLogger("jevscout.feeds.ashby")
 
 PARSER_VERSION = "feed-ashby-v1"
 
@@ -72,7 +76,7 @@ def parse_ashby_feed(
         normalized_loc = normalize_india_location(active_location) if is_india else (active_location or None)
 
         department = _text(item.get("department"))
-        description = _text(item.get("descriptionHtml"))
+        description = sanitize_description(item.get("descriptionHtml"))
 
         app_url = _safe_url(item.get("jobUrl"), source_url)
         if not app_url:
@@ -97,4 +101,10 @@ def parse_ashby_feed(
             }
         )
 
+    logger.debug(
+        "parsed ashby feed artifact_ref=%s total=%d filtered_india=%d",
+        artifact_ref,
+        len(raw_jobs),
+        len(results),
+    )
     return results

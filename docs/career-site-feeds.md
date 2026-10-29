@@ -1,159 +1,102 @@
-# Browserless Career Feeds and Endpoints (India & Global)
+# Browserless Career Feeds and ATS Discovery (India & Global)
 
-Status: Research and architecture documentation, October 2026.
+Status: Comprehensive research, empirical coverage measurement, and architecture documentation, October 2026.
 Branch: `gemini/feature/job-portal`.
 
-## 1. Executive Summary
+---
 
-Traditional job boards in India (Naukri, Foundit/Monster, Cutshort, Instahyre) aggressively block browserless requests via Cloudflare and Akamai bot management, offering no public REST/JSON/RSS endpoints without paid enterprise recruiter agreements.
+## 1. Executive Summary & The Discovery Paradigm
 
-However, modern technology companies hiring in India—from startups and unicorns (e.g., Swiggy, Razorpay, Zepto, Postman, CRED, InMobi, Clevertap) to multinational engineering hubs (e.g., Atlassian, Uber, Stripe, Twilio, Datadog)—publish their real-time job openings directly to **public Application Tracking System (ATS) endpoints**.
+Traditional job aggregators (LinkedIn, Indeed, Naukri) rely on scraping and aggressive bot countermeasures. In contrast, modern applicant tracking systems (ATS) publish **public, unauthenticated, structured JSON endpoints** designed specifically for careers pages.
 
-These endpoints are:
-1. **Completely browserless**: standard HTTP `GET` returning clean JSON or structured feeds.
-2. **Zero-credential**: no API keys, accounts, or cookies required for public job board listings.
-3. **Structured & authoritative**: direct from the employer, avoiding scraped aggregator stale data.
-4. **Richly filterable**: include location names, office hierarchies, department, workplace type (hybrid/remote), and full job descriptions.
+Based on empirical data from the [Open ATS Feed measurement](https://veresk06.github.io/open-ats-feed/):
+- **18,164 live companies** and **439,867 live postings** are directly reachable across 6 primary ATS vendors with zero authentication and zero terms-of-service violations.
+- Company discovery does not require search engines or crawling: **Common Crawl's URL index (CDX)** is a pre-indexed directory of company board tokens. A targeted binary-search range request against `cluster.idx` on `data.commoncrawl.org` enumerates company slugs across entire crawls for ~700 KB of network transfer per host.
 
 ---
 
-## 2. Supported Public Browserless ATS Endpoints
+## 2. The 6 Permitted & Validated ATS Feed Endpoints
 
-### 2.1 Greenhouse Public Board API
+Every provider listed below is verified under RFC 9309 `robots.txt` compliance against both live endpoints and Common Crawl archived history.
 
-- **Endpoint**: `GET https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true`
-- **Single Job**: `GET https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs/{job_id}`
-- **Authentication**: None required.
-- **Payload Format**: JSON.
-- **Key Fields**:
-  - `id`: Unique posting integer ID.
-  - `title`: Job title.
-  - `location.name`: Location string (e.g., `"Bengaluru, Karnataka, India"`, `"Remote - India"`).
-  - `offices`: Array of office objects (`id`, `name`, `location`).
-  - `departments`: Array of department objects (`id`, `name`).
-  - `content`: Unescaped HTML description.
-  - `updated_at`: ISO 8601 timestamp.
-  - `absolute_url`: Canonical application link.
-- **India Usage**: Heavy. Thousands of tech companies with India offices (e.g., InMobi, Datadog India, Stripe India, Twilio India, Elastic, GoTo, Figma, etc.).
-
-### 2.2 Lever Postings API
-
-- **Endpoint**: `GET https://api.lever.co/v0/postings/{company_slug}?mode=json`
-- **Single Job**: `GET https://api.lever.co/v0/postings/{company_slug}/{posting_id}`
-- **Authentication**: None required.
-- **Payload Format**: JSON.
-- **Key Fields**:
-  - `id`: Posting UUID.
-  - `text`: Job title.
-  - `categories.location`: Location string (e.g., `"Bangalore"`, `"Hyderabad"`, `"Pune"`).
-  - `categories.team`: Team / department.
-  - `categories.commitment`: E.g., `"Full-time"`.
-  - `workplaceType`: `"on-site"`, `"remote"`, or `"hybrid"`.
-  - `description`: HTML description.
-  - `descriptionPlain`: Plain text description.
-  - `hostedUrl`: Canonical application link.
-  - `createdAt`: Millisecond unix timestamp.
-- **India Usage**: Very high among top Indian SaaS and product startups (e.g., Postman, Atlassian India, Razorpay, Zepto, Hasura, BrowserStack).
-
-### 2.3 Ashby Public Job Posting API
-
-- **Endpoint**: `GET https://api.ashbyhq.com/posting-api/job-board/{board_name}?includeCompensation=true`
-- **Authentication**: None required.
-- **Payload Format**: JSON.
-- **Key Fields**:
-  - `jobs[].id`: Posting UUID.
-  - `jobs[].title`: Job title.
-  - `jobs[].location`: Primary location (e.g., `"Bengaluru, India"`).
-  - `jobs[].secondaryLocations`: Array of secondary locations.
-  - `jobs[].department`: Department name.
-  - `jobs[].employmentType`: Employment type.
-  - `jobs[].isRemote`: Boolean flag.
-  - `jobs[].jobUrl`: Canonical application link.
-  - `jobs[].publishedAt`: ISO 8601 timestamp.
-  - `jobs[].descriptionHtml`: HTML description.
-  - `jobs[].compensation`: Structured compensation tier if published.
-- **India Usage**: Rapidly expanding; standard for AI startups, Y Combinator companies, and modern scale-ups hiring remote or India-based engineers (e.g., Retool, Linear, Ramp, Cursor/Anysphere).
-
-### 2.4 SmartRecruiters Public Postings API
-
-- **Endpoint**: `GET https://api.smartrecruiters.com/v1/companies/{company}/postings`
-- **Detail**: `GET https://api.smartrecruiters.com/v1/companies/{company}/postings/{posting_id}`
-- **Authentication**: None required.
-- **Payload Format**: JSON.
-- **Key Fields**:
-  - `content[].id`: Unique posting ID.
-  - `content[].name`: Job title.
-  - `content[].location.city`: City name (e.g., `"Bangalore"`, `"Gurugram"`).
-  - `content[].location.region`: State / Region.
-  - `content[].location.country`: ISO country code (`"in"`).
-  - `content[].department.label`: Department.
-  - `content[].releasedDate`: ISO 8601 timestamp.
-- **India Usage**: Prominent among large technology consulting firms, GCCs (Global Capability Centers), and enterprise tech hubs in India (e.g., Visa, Bosch India, Publicis Sapient, Informatica).
-
-### 2.5 Workable Public API
-
-- **Endpoint**: `GET https://apply.workable.com/api/v1/widget/accounts/{company_slug}` or `GET https://apply.workable.com/api/v2/accounts/{company_slug}/jobs`
-- **Authentication**: None required.
-- **Payload Format**: JSON.
-- **Key Fields**: `title`, `department`, `city`, `country`, `state`, `telecommuting`, `shortlink`.
-- **India Usage**: Mid-sized tech companies and digital agencies with offices in India.
-
-### 2.6 Remote & Developer Feeds (Worldwide / India Eligible)
-
-- **RemoteOK Public API**: `GET https://remoteok.com/api` (Public JSON array of developer postings; includes `location` field and country eligibility).
-- **Hacker News "Who is Hiring?"**: `https://hacker-news.firebaseio.com/v0/item/{story_id}.json` (Official Firebase API; pure JSON discussion item with nested comments; parsed for `[India]`, `[Remote]`, `[Bangalore]`, etc.).
+| Provider | URL Token Structure | Public Unauthenticated API Endpoint | Verified Liveness Rate | Measured Live Postings | Politeness & Rate Limits |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Greenhouse** | Path: `boards.greenhouse.io/{token}` | `GET https://boards-api.greenhouse.io/v1/boards/{token}/jobs?content=true` | 56.5% (5,971 live) | 196,407 | Allowed. Live robots disallows `/embed/`, does not touch `/v1/boards/`. |
+| **Ashby** | Path: `jobs.ashbyhq.com/{token}` | `GET https://api.ashbyhq.com/posting-api/job-board/{token}?includeCompensation=true` | 72.7% (3,413 live) | 59,609 | Allowed. Live endpoint returns 401 on `/robots.txt` (never served). |
+| **Lever** | Path: `jobs.lever.co/{token}` | `GET https://api.lever.co/v0/postings/{token}?mode=json` | 37.5% (1,925 live) | 69,565 | **Strict Crawl-delay: 1 req/sec**. `api.lever.co` robots allows `/`. |
+| **Breezy HR** | Subdomain: `{token}.breezy.hr` | `GET https://{token}.breezy.hr/json` | 43.3% (2,077 live) | 41,119 | Allowed. Disallows `/css`, `/fonts`, `/javascripts`. |
+| **Recruitee** | Subdomain: `{token}.recruitee.com` | `GET https://{token}.recruitee.com/api/offers/` | 65.1% (2,444 live) | 39,628 | Allowed. Disallows `/v/`. |
+| **Teamtailor** | Subdomain: `{token}.teamtailor.com` | `GET https://{token}.teamtailor.com/jobs.json` | 66.3% (2,334 live) | 33,539 | Allowed. Disallows `/app/`, `/messages/`. |
 
 ---
 
-## 3. Strict Location Filtering for India
+## 3. Explicitly Refused Vendors (Governance Boundary)
 
-Per user requirement, filtering is strictly limited to **India and India-eligible remote roles**:
+In accordance with JevScout's strict operational permissions, the following vendors are **explicitly excluded**:
 
-### 3.1 Accepted Locations
-1. **Direct Indian Cities & States**:
-   - `"Bengaluru"`, `"Bangalore"`, `"Karnataka"`
-   - `"Hyderabad"`, `"Secunderabad"`, `"Telangana"`, `"Andhra Pradesh"`
-   - `"Pune"`, `"Mumbai"`, `"Navi Mumbai"`, `"Thane"`, `"Maharashtra"`
-   - `"Gurgaon"`, `"Gurugram"`, `"Noida"`, `"Greater Noida"`, `"Delhi"`, `"New Delhi"`, `"NCR"`
-   - `"Chennai"`, `"Tamil Nadu"`
-   - `"Kolkata"`, `"West Bengal"`
-   - `"Kochi"`, `"Cochin"`, `"Kerala"`
-   - `"Ahmedabad"`, `"Gujarat"`
-   - `"Chandigarh"`, `"Mohali"`, `"Jaipur"`, `"Indore"`
-   - Country name: `"India"`, `", IN"`, `"country: in"`
-
-2. **India-Eligible Remote Roles**:
-   - Explicit India remote: `"Remote - India"`, `"India - Remote"`, `"Remote (India)"`, `"Remote, India"`
-   - Broad / Global remote: `"Worldwide Remote"`, `"Anywhere in the world"`, `"Remote - Global"`, `"Remote (APAC / India)"`
-
-### 3.2 Strictly Rejected Locations
-- Explicit other countries: `"United States"`, `"USA"`, `"UK"`, `"London"`, `"Germany"`, `"Berlin"`, `"Canada"`, `"Toronto"`, `"Singapore"`, `"Australia"`, etc.
-- Region-locked remote that excludes India:
-  - `"Remote - US"`, `"Remote (US Only)"`, `"Remote - North America"`, `"US Remote"`
-  - `"Remote - EMEA"`, `"Remote - Europe"`, `"Remote - UK"`
-  - `"Remote - LatAm"`
-- Unspecified "Remote" without country context if the employer's board indicates non-India default (or flagged for inspection).
+1. **SmartRecruiters**:
+   - `api.smartrecruiters.com/robots.txt` explicitly serves `Disallow: /` to User-Agent `*`, with only `LinkedInBot` scoped to `/v1/companies/`.
+   - *Policy*: Since JevScout is not LinkedInBot, automated access violates vendor declaration. **Refused**.
+2. **Personio**:
+   - Tenant robots.txt historically and structurally disallows `/xml` (the public feed path). Live host returns 404 on robots.txt due to recent migration, but archived policy disallows. **Refused**.
+3. **Workable**:
+   - While technically accessible, Workable aggressively rate-limits and throttles unauthenticated requests under concurrent load to uselessness. **Refused**.
+4. **Naukri / Foundit / Cutshort**:
+   - Guarded behind Cloudflare/Akamai bot management; lack public browserless APIs. **Refused**.
 
 ---
 
-## 4. Architecture: The `FeedSourceAdapter` Pattern
+## 4. Token Discovery Architecture via Common Crawl S3
 
-Rather than writing custom one-off scrapers, we introduce a modular `FeedSourceAdapter` interface in `src/jevscout/feeds/`:
+Instead of scraping search engines to find which employers use Greenhouse, Ashby, or Lever, JevScout implements **CDX Index Harvesting**:
 
-```
-src/jevscout/feeds/
-├── __init__.py
-├── base.py            # FeedAdapter protocol and NormalizedFeedJob data structure
-├── registry.py        # Feed registry (detects and routes by URL or source name)
-├── greenhouse.py      # Greenhouse JSON feed adapter
-├── lever.py           # Lever JSON feed adapter
-├── ashby.py           # Ashby JSON feed adapter
-└── location.py        # India location matcher and normalizer
+```mermaid
+flowchart TD
+    S3[data.commoncrawl.org] -->|Range Request 700KB| ClusterIdx[cluster.idx Binary Search]
+    ClusterIdx -->|Locate SURT blocks| Blocks[SURT Blocks e.g. io,greenhouse,boards]
+    Blocks -->|Extract token segment| Tokens[(Raw Company Tokens)]
+    Tokens --> Probe[Liveness Probe with Rate Limiting]
+    Probe --> Validated[(Live Company Feed Index)]
 ```
 
-### Key Contract:
-1. **Input**: A seed URL (e.g. `https://boards.greenhouse.io/stripe` or API URL) or a configured board identifier (`greenhouse:stripe`, `lever:postman`).
-2. **Fetch**: Uses the existing application HTTP client (zero browser, respect redirect and timeout boundaries).
-3. **Parse**: Maps provider-specific JSON fields into [`JobPosting`](../src/jevscout/extraction.py) records directly, populating source URL, provenance, and title.
-4. **Filter**: Optional India filter matching city, state, country, or remote eligibility.
-5. **Storage**: The raw feed JSON is saved as an artifact in `./data/runs/<id>/artifacts/pages/` for auditability and offline re-extraction.
+### 4.1 Token Extraction Rules
+- **Path-based hosts**:
+  - `io,greenhouse,boards)/{token}` -> token is segment 1.
+  - `co,lever,jobs)/{token}` -> token is segment 1.
+  - `com,ashbyhq,jobs)/{token}` -> token is segment 1.
+- **Subdomain-based hosts**:
+  - `hr,breezy,{token})/` -> token is the subdomain segment.
+  - `com,recruitee,{token})/` -> token is the subdomain segment.
+  - `com,teamtailor,{token})/` -> token is the subdomain segment.
+
+### 4.2 Lever Robot Exclusion Historical Fix
+`jobs.lever.co/robots.txt` contains `User-agent: CCBot / Disallow: /`, so recent Common Crawl crawls contain only 62 records (all robots.txt itself). However, older Common Crawl indices (2024–2025) were crawled before this ban and hold thousands of valid board URLs. Sweeping prior crawl archives recovers 4,960+ Lever candidate tokens ethically, and liveness probes run against `api.lever.co` at 1 req/sec.
+
+---
+
+## 5. Strict India Location Filtering & Quality Rules
+
+### 5.1 Geographic Matching Policy
+To guarantee Indian tech candidates only receive relevant jobs:
+- **Direct Indian Locations**:
+  - Cities: Bengaluru/Bangalore, Hyderabad, Pune, Mumbai, Gurgaon/Gurugram, Noida, Delhi NCR, Chennai, Kochi, Kolkata, Ahmedabad, Chandigarh, Jaipur, Indore.
+  - Country match: `"India"`, `", IN"`, `"country: in"`.
+- **India-Eligible Remote**:
+  - Explicit: `"Remote - India"`, `"India - Remote"`, `"Remote (India)"`.
+  - Worldwide: `"Worldwide Remote"`, `"Anywhere in the world"`, `"Remote - Global"`.
+- **Strictly Excluded**:
+  - Foreign countries: US, UK, Germany, Canada, Singapore, Australia, etc.
+  - Region-locked remotes: `"Remote - US Only"`, `"Remote - North America"`, `"Remote - EMEA"`, `"Remote - LatAm"`.
+
+### 5.2 Quality Guards Against Description Noise & False Positives
+Empirical findings demonstrate three critical parsing failure modes that JevScout guards against:
+
+1. **Department Explosion (>25 threshold)**:
+   - When a company board exposes more than 25 distinct departments (e.g. healthcare or field staffing), the department field is a local branch or sub-team code (e.g. `"Regional Visits (BV) - 94"`), not an organizational function.
+   - *Guard*: Suppress department grouping when count exceeds 25.
+2. **Industry Acronym Collisions**:
+   - Non-tech domains share acronyms with software engineering: e.g. `dbt` (Dialectical Behavior Therapy in clinical health vs. data build tool in analytics), `PHP` (Partial Hospitalization Program vs. scripting language).
+   - *Guard*: Ambiguous tech keywords must only match when the job title, team, or department qualifies as technical.
+3. **Markup & CDN Boilerplate Stripping**:
+   - Company descriptions frequently embed CDN script URLs (e.g., `cdn2.hubspot.net`, `static.xx.fbcdn.net/images/emoji.php/...`) which trigger false positives for tech stacks like `.NET` or `PHP`.
+   - *Guard*: Strip URLs, emails, and HTML tags before keyword or stack evaluation.

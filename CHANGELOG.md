@@ -2,14 +2,16 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
-## Career site feeds and India-only filtering — 2026-10-29
+## Complete 6-provider ATS feeds, token harvesting and quality guards — 2026-10-29
 
-- Added browserless public feed adapters for Greenhouse, Lever, and Ashby ATS endpoints with automatic format detection.
-- Added strict India location filtering and canonical hub normalization (Bengaluru, Hyderabad, Pune, Mumbai, Gurgaon, Noida, Delhi NCR, Chennai, Kochi, Kolkata, Ahmedabad) and India-eligible remote roles (`"India - Remote"`, `"Worldwide Remote"`, `"Anywhere in the world"`).
-- Strictly rejects overseas locations (US, UK, Germany, Canada, Singapore, etc.) and non-India restricted remotes (`"Remote - US Only"`, `"Remote - EMEA"`, etc.).
-- Integrated feed extraction into core `parse_jobs` and application `extract_run` with `--india-only` flag on `runs results` and `runs extract`.
+- Added browserless public feed adapters for all 6 verified ATS platforms: Greenhouse, Lever, Ashby, Breezy HR, Recruitee, and Teamtailor.
+- Added Common Crawl CDX token harvester (`harvester.py`) for discovering public company tokens via SURT key extraction and building unauthenticated API endpoints.
+- Added quality guards (`quality.py`): CDN URL and script boilerplate sanitization, technical role title scoping for ambiguous industry acronyms (`dbt`, `PHP`), and department explosion mitigation (>25 threshold).
+- Enforced strict India-only location filtering (`is_india_eligible`, `normalize_india_location`) across all 6 providers with canonical tech hubs and India-eligible remote roles.
+- Diagnostic logs updated across all feed adapters to maintain strict privacy without leaking source URLs in debug output.
 
-Verification: 68 passing tests across unit, integration, and CLI suites (`PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v`). Agent note: `career-feeds.md`. No third-party network or paid APIs used.
+Verification: 90 passing tests across unit, integration, and CLI suites (`PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v`). Agent notes: `career-feeds.md`, `all-ats-feeds.md`. No third-party network or paid APIs used.
+
 
 
 ## Collection foundations — 2026-10-29

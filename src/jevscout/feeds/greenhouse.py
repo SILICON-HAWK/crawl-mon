@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import json
+import logging
 from html import unescape
 from typing import Any
 
 from jevscout.extraction import _safe_url, _text
 from jevscout.feeds.location import is_india_eligible, normalize_india_location
+from jevscout.feeds.quality import sanitize_description
+
+logger = logging.getLogger("jevscout.feeds.greenhouse")
 
 PARSER_VERSION = "feed-greenhouse-v1"
 
@@ -84,7 +88,7 @@ def parse_greenhouse_feed(
         description = None
         if isinstance(raw_content, str):
             # Greenhouse content can contain escaped HTML entities
-            description = _text(unescape(raw_content))
+            description = sanitize_description(unescape(raw_content))
 
         # URL
         app_url = _safe_url(item.get("absolute_url"), source_url)
@@ -110,4 +114,10 @@ def parse_greenhouse_feed(
             }
         )
 
+    logger.debug(
+        "parsed greenhouse feed artifact_ref=%s total=%d filtered_india=%d",
+        artifact_ref,
+        len(raw_jobs),
+        len(results),
+    )
     return results

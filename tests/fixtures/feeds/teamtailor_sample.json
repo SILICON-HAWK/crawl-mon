@@ -1,0 +1,52 @@
+[
+  {
+    "id": 301,
+    "title": "Principal Infrastructure Architect",
+    "locations": "Bengaluru, Karnataka, India",
+    "remote_status": "hybrid",
+    "department": "Infrastructure",
+    "body": "<div><p>Design multi-cloud Kubernetes infra in Bengaluru.</p></div>",
+    "url": "https://brand.teamtailor.com/jobs/301-principal-infra",
+    "created_at": "2026-10-25T15:00:00.000Z"
+  },
+  {
+    "id": 302,
+    "title": "Senior QA Automation Engineer",
+    "locations": "Hyderabad, Telangana",
+    "remote_status": "on_site",
+    "department": "Quality Engineering",
+    "body": "<div><p>Build end to end automation in Hyderabad.</p></div>",
+    "url": "https://brand.teamtailor.com/jobs/302-senior-qa",
+    "created_at": "2026-10-26T12:00:00.000Z"
+  },
+  {
+    "id": 303,
+    "title": "Site Reliability Engineer (Global)",
+    "locations": "Worldwide Remote",
+    "remote_status": "remote",
+    "department": "Operations",
+    "body": "<div><p>Global on-call rotation from anywhere in the world.</p></div>",
+    "url": "https://brand.teamtailor.com/jobs/303-sre-global",
+    "created_at": "2026-10-27T08:00:00.000Z"
+  },
+  {
+    "id": 304,
+    "title": "Stockholm Product Lead",
+    "locations": "Stockholm, Sweden",
+    "remote_status": "on_site",
+    "department": "Product",
+    "body": "<div><p>Lead Swedish product lines.</p></div>",
+    "url": "https://brand.teamtailor.com/jobs/304-stockholm-pm",
+    "created_at": "2026-10-24T09:00:00.000Z"
+  },
+  {
+    "id": 305,
+    "title": "US Only Remote Designer",
+    "locations": "Remote (US Only)",
+    "remote_status": "remote",
+    "department": "Design",
+    "body": "<div><p>Design roles for North America.</p></div>",
+    "url": "https://brand.teamtailor.com/jobs/305-us-designer",
+    "created_at": "2026-10-23T10:00:00.000Z"
+  }
+]

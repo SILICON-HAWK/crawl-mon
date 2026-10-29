@@ -5,15 +5,15 @@
 - Project and Git root: `/home/abhi/work/jevscout`. Run project commands here, not in `/home/abhi/work`.
 - Repository: https://github.com/SILICON-HAWK/crawl-mon
 - Active Branch: `gemini/feature/job-portal` (tracking `origin/gemini/feature/job-portal`).
-- Latest verified state: Browserless career feeds (Greenhouse, Lever, Ashby) implemented with strict India location filtering (`is_india_eligible`, `normalize_india_location`), auto-detection registry, and CLI integration (`--india-only`). 68 tests passing.
+- Latest verified state: Complete 6-provider browserless career feeds (Greenhouse, Lever, Ashby, Breezy HR, Recruitee, Teamtailor), Common Crawl CDX token harvester, quality/acronym guards, and strict India location filtering. 90 tests passing.
 
 ## Current task and stopping point
 
-Browserless career site feed extraction is complete and verified across all target ATS endpoints (Greenhouse, Lever, Ashby) with strict India-only location rules (including India-eligible remote). The test suite comprises 68 passing tests.
+Browserless career site feed collection, discovery, and filtering is fully complete and verified across all 6 target ATS platforms (Greenhouse, Lever, Ashby, Breezy HR, Recruitee, Teamtailor) with strict India-only location rules (including India-eligible remote), quality/acronym guards, and CDX token harvesting. The test suite comprises 90 passing tests.
 
 Next steps for this workstream:
-1. Seed expansion / discovery: Curating Indian tech employer board tokens / career URLs (e.g., Postman, InMobi, Razorpay, Zepto, CRED, Atlassian India, Stripe India).
-2. JEV matching pipeline: candidate profile schema and composite scoring evaluation on extracted India postings.
+1. JEV matching pipeline: candidate profile schema and composite scoring evaluation on extracted India postings.
+2. Token harvest script execution against Common Crawl S3 index to build curated Indian tech employer seeds.
 
 Implementation has begun with a zero-runtime-dependency Python package, filesystem run/artifact storage, and CLI pending-run create/show/list. Creating a record does not approve or execute a crawl. Read `CHANGELOG.md` and `docs/changes/` for behavior, test evidence, and limitations. Do not return to job-profile questions prematurely.
 

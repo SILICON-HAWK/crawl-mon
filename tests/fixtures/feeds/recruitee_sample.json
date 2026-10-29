@@ -1,0 +1,64 @@
+{
+  "offers": [
+    {
+      "id": 201,
+      "title": "Principal Architect, Distributed Data",
+      "careers_url": "https://techco.recruitee.com/o/principal-architect",
+      "created_at": "2026-10-25 14:00:00 UTC",
+      "location": "Bengaluru, Karnataka, India",
+      "city": "Bengaluru",
+      "country_code": "IN",
+      "remote": false,
+      "department": "Engineering",
+      "description": "<p>Build high scale data pipelines in Bangalore.</p>"
+    },
+    {
+      "id": 202,
+      "title": "Senior Mobile Engineer (Android/iOS)",
+      "careers_url": "https://techco.recruitee.com/o/senior-mobile-engineer",
+      "created_at": "2026-10-26 10:00:00 UTC",
+      "location": "Pune, Maharashtra",
+      "city": "Pune",
+      "country_code": "IN",
+      "remote": false,
+      "department": "Mobile",
+      "description": "<p>Develop flagship mobile app in Pune office.</p>"
+    },
+    {
+      "id": 203,
+      "title": "AI Research Engineer (Global)",
+      "careers_url": "https://techco.recruitee.com/o/ai-researcher",
+      "created_at": "2026-10-27 12:00:00 UTC",
+      "location": "Worldwide Remote",
+      "city": "",
+      "country_code": "",
+      "remote": true,
+      "department": "AI Labs",
+      "description": "<p>Train deep models from anywhere in the world.</p>"
+    },
+    {
+      "id": 204,
+      "title": "Amsterdam Product Manager",
+      "careers_url": "https://techco.recruitee.com/o/amsterdam-pm",
+      "created_at": "2026-10-24 08:00:00 UTC",
+      "location": "Amsterdam, Netherlands",
+      "city": "Amsterdam",
+      "country_code": "NL",
+      "remote": false,
+      "department": "Product",
+      "description": "<p>Lead European product strategy.</p>"
+    },
+    {
+      "id": 205,
+      "title": "Remote Europe Frontend Engineer",
+      "careers_url": "https://techco.recruitee.com/o/remote-europe-frontend",
+      "created_at": "2026-10-23 09:00:00 UTC",
+      "location": "Remote - Europe",
+      "city": "",
+      "country_code": "DE",
+      "remote": true,
+      "department": "Frontend",
+      "description": "<p>European timezone remote engineer.</p>"
+    }
+  ]
+}

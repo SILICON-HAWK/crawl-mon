@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import datetime
 import json
+import logging
 from typing import Any
 
 from jevscout.extraction import _safe_url, _text
 from jevscout.feeds.location import is_india_eligible, normalize_india_location
+from jevscout.feeds.quality import sanitize_description
+
+logger = logging.getLogger("jevscout.feeds.lever")
 
 PARSER_VERSION = "feed-lever-v1"
 
@@ -60,9 +64,8 @@ def parse_lever_feed(
         normalized_loc = normalize_india_location(raw_location) if is_india else raw_location
 
         # Description: prefer descriptionPlain if available, otherwise description HTML
-        description = _text(item.get("descriptionPlain"))
-        if not description:
-            description = _text(item.get("description"))
+        raw_desc = item.get("descriptionPlain") or item.get("description")
+        description = sanitize_description(raw_desc)
 
         # URL
         app_url = _safe_url(item.get("hostedUrl"), source_url)
@@ -96,4 +99,10 @@ def parse_lever_feed(
             }
         )
 
+    logger.debug(
+        "parsed lever feed artifact_ref=%s total=%d filtered_india=%d",
+        artifact_ref,
+        len(data),
+        len(results),
+    )
     return results
