@@ -1,0 +1,42 @@
+# Architecture decisions
+
+Working decisions from the architecture grilling session. Architecture is being settled before job-specific requirements or implementation. No implementation is authorized by this record.
+
+## Confirmed
+
+- Build a general web crawler with target-specific modules; job collection is the first use case.
+- Share discovery, fetching, extraction, classification, and results persistence across modules.
+- Keep stages separate, with persisted inputs, outputs, and execution status for retries and reruns.
+- Start as one modular application with a database rather than separate services.
+- Application code controls scheduling, execution, retries, and persistence. JEV performs focused classification decisions.
+- Modules expose callable tools backed by shared execution machinery. Shared operations cover starting runs, inspecting status, cancelling, and retrieving results.
+- Agents submit structured pipeline inputs and may propose JEV questions, classification labels, scoring rubrics, and weights. Validate and version that configuration.
+- Starting a run returns a run ID promptly. Background execution belongs to the application; the agent can subsequently monitor and retrieve results.
+- User clarification supersedes approval for every read: explicitly approve work and approval overrides, then permit execution and observation within that authorization. The purpose is bounded agent execution rather than repeated approval prompts.
+- Agents may propose follow-up runs, subject to user approval. Preserve parent-run and initiator provenance.
+- Keep a focused core application library separate from CLI, MCP, HTTP, UI, and worker entry points. Interfaces share application operations rather than duplicating business rules.
+- Support container deployment, persistent storage, and an optional UI. The UI initially covers approvals, run submission/progress/cancellation, and a results explorer.
+- Organize results as runs, collected items, extracted data, and versioned JEV decisions with source/application links. Custom UI work is deferred.
+- Module declarations describe configuration, actions, and result types for future UI use.
+- Approval mode is deployment configuration. Agents may change it only through an explicitly user-approved configuration operation, never unilaterally through run inputs.
+- Application-managed and host-delegated approval are supported design modes. Delegating approval does not remove resource limits.
+- Enforce approved limits on concurrency, runtime, page collection, and model usage. Agents submit managed work rather than spawning arbitrary workers.
+- Persist accepted runs and pending work in the database for recovery. CLI supports background submission and waiting for completion.
+- Add structured operational logs and opt-in debug logs at meaningful boundaries. Correlate by run/task/stage IDs; redact credentials, profile contents, and page bodies. Record stage transitions, retries, failures, cancellation, budget exhaustion, approval changes, and model request metadata.
+
+## Execution topology
+
+All application instances initially run on the same machine, potentially in separate containers. CLI/MCP/API adapters call the core submission/query layer. Instances share a durable database-backed queue; bounded workers claim tasks and persist progress and results. The UI is optional. Remote client connections and authentication are deferred behind a future adapter.
+
+Separate code boundaries do not require separate network services. Worker startup is explicit and managed rather than triggered once per submission. PostgreSQL with a maintained queue library is the current recommendation, not a finalized stack decision. Queue-library selection and alternative execution designs remain under discussion.
+
+## Next architecture decisions
+
+- Approval is bound to exact structured inputs; the detailed trusted approval interaction remains to be designed.
+- How approved background execution is bounded, including handling discoveries that expand source scope.
+- Select the core language and durable queue implementation after reviewing tradeoffs.
+- What data flows between stages and what modules can customize.
+
+## Scope clarification
+
+Existing job-focused documents describe an initial use case, not the boundary of the core system. Job preferences, detailed schemas, stack choices, and implementation steps are deferred. All project documentation belongs under `/home/abhi/work/jevscout`.
