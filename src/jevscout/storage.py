@@ -213,6 +213,35 @@ class FileRunStore:
             raise ValueError("stored results have an invalid format")
         return document["items"]
 
+    def save_evaluations(self, run_id: str, evaluations: list[dict]) -> None:
+        self.get(run_id)
+        if not isinstance(evaluations, list):
+            raise TypeError("evaluations must be a list")
+        if any(not isinstance(item, dict) for item in evaluations):
+            raise TypeError("each evaluation must be an object")
+        document = {
+            "schema_version": 1,
+            "evaluations": evaluations,
+        }
+        json.dumps(document, ensure_ascii=False, allow_nan=False)
+        self._atomic_json(self._run_dir(run_id) / "evaluations.json", document)
+
+    def list_evaluations(self, run_id: str) -> list[dict]:
+        self.get(run_id)
+        path = self._run_dir(run_id) / "evaluations.json"
+        if not path.is_file():
+            return []
+        with path.open("r", encoding="utf-8") as source:
+            document = json.load(source)
+        if (
+            not isinstance(document, dict)
+            or document.get("schema_version") != 1
+            or not isinstance(document.get("evaluations"), list)
+            or any(not isinstance(item, dict) for item in document["evaluations"])
+        ):
+            raise ValueError("stored evaluations have an invalid format")
+        return document["evaluations"]
+
     @contextmanager
     def operation_lock(self) -> Iterator[None]:
         """Exclude another local operation using a nonblocking advisory lock."""

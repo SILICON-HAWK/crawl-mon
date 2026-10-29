@@ -89,3 +89,48 @@ class FeedIntegrationTests(unittest.TestCase):
         cli_results = json.loads(out.getvalue())
         self.assertEqual(len(cli_results), 3)
         self.assertTrue(all(j.get("is_india") for j in cli_results))
+
+    def test_end_to_end_feed_extraction_to_decision_scoring(self):
+        spec = RunSpec(
+            seed_urls=["https://boards-api.greenhouse.io/v1/boards/techcorp/jobs"],
+            max_pages=1,
+            max_depth=0,
+            timeout_seconds=30,
+        )
+        record = self.store.create(spec)
+        run_id = record.id
+
+        gh_json = (self.fixtures_dir / "greenhouse_sample.json").read_text(encoding="utf-8")
+        self.store.save_page(
+            run_id,
+            "https://boards-api.greenhouse.io/v1/boards/techcorp/jobs",
+            gh_json,
+            {"status_code": 200, "depth": 0},
+        )
+        self.store.update(replace(record, status="completed"))
+
+        # Extract India jobs
+        extract_run(self.store, run_id, india_only=True)
+
+        # Score run with candidate profile
+        from jevscout.application import score_run
+        from jevscout.scoring.client import LocalHeuristicDecisionClient
+        from jevscout.scoring.models import CandidateProfile
+
+        profile = CandidateProfile(
+            role_target="Platform / Backend Engineer",
+            primary_skills=["Distributed Systems", "Infrastructure"],
+            experience_years=6.0,
+            preferred_locations=["Bengaluru", "Pune"],
+        )
+        evaluations = score_run(
+            self.store, run_id, profile, client=LocalHeuristicDecisionClient()
+        )
+
+        self.assertEqual(len(evaluations), 3)
+        platform_eval = next(e for e in evaluations if "Platform" in e["job_title"])
+        self.assertEqual(platform_eval["recommendation"], "STRONG_MATCH")
+
+        # Verify stored evaluations
+        stored = self.store.list_evaluations(run_id)
+        self.assertEqual(len(stored), 3)

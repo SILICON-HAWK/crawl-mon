@@ -50,6 +50,20 @@ def _parser() -> argparse.ArgumentParser:
     artifact = actions.add_parser("artifact", help="read saved page evidence")
     artifact.add_argument("run_id")
     artifact.add_argument("--ref", required=True)
+
+    score = actions.add_parser("score", help="evaluate extracted jobs with decision model")
+    score.add_argument("run_id")
+    score.add_argument("--role", default="Software Engineer", help="target role title")
+    score.add_argument("--skills", default="", help="comma-separated primary skills")
+    score.add_argument("--locations", default="India", help="comma-separated preferred locations")
+    score.add_argument("--years", type=float, default=3.0, help="years of relevant experience")
+    score.add_argument("--remote-only", action="store_true", help="require fully remote roles")
+    score.add_argument("--model", default="respan/span-01-lite:free", help="decision model identifier")
+    score.add_argument("--offline", action="store_true", help="use local offline heuristic client")
+    score.add_argument("--profile-json", type=Path, help="path to candidate profile JSON")
+
+    evaluations = actions.add_parser("evaluations", help="list saved match evaluations")
+    evaluations.add_argument("run_id")
     return parser
 
 
@@ -110,6 +124,43 @@ def main(argv: list[str] | None = None) -> int:
             _emit(store.read_execution(args.run_id))
         elif args.action == "artifact":
             _emit({"html": store.read_artifact(args.run_id, args.ref)})
+        elif args.action == "score":
+            from .application import score_run
+            from .scoring.models import CandidateProfile
+
+            if args.profile_json:
+                with args.profile_json.open("r", encoding="utf-8") as f:
+                    pdata = json.load(f)
+                profile = CandidateProfile(
+                    role_target=pdata["role_target"],
+                    primary_skills=pdata.get("primary_skills", []),
+                    experience_years=float(pdata.get("experience_years", 3.0)),
+                    preferred_locations=pdata.get("preferred_locations", ["India"]),
+                    remote_only=bool(pdata.get("remote_only", False)),
+                    secondary_skills=pdata.get("secondary_skills", []),
+                )
+            else:
+                skills = [s.strip() for s in args.skills.split(",") if s.strip()]
+                locs = [l.strip() for l in args.locations.split(",") if l.strip()]
+                profile = CandidateProfile(
+                    role_target=args.role,
+                    primary_skills=skills,
+                    experience_years=args.years,
+                    preferred_locations=locs or ["India"],
+                    remote_only=args.remote_only,
+                )
+
+            client = None
+            if args.offline:
+                from .scoring.client import LocalHeuristicDecisionClient
+                client = LocalHeuristicDecisionClient()
+
+            evaluations_res = score_run(
+                store, args.run_id, profile, client=client, model=args.model
+            )
+            _emit(evaluations_res)
+        elif args.action == "evaluations":
+            _emit(store.list_evaluations(args.run_id))
         return 0
     except (json.JSONDecodeError, KeyError):
         logger.error("stored run data is corrupt")

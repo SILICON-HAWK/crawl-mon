@@ -5,15 +5,20 @@
 - Project and Git root: `/home/abhi/work/jevscout`. Run project commands here, not in `/home/abhi/work`.
 - Repository: https://github.com/SILICON-HAWK/crawl-mon
 - Active Branch: `gemini/feature/job-portal` (tracking `origin/gemini/feature/job-portal`).
-- Latest verified state: Complete 6-provider browserless career feeds (Greenhouse, Lever, Ashby, Breezy HR, Recruitee, Teamtailor), Common Crawl CDX token harvester, quality/acronym guards, and strict India location filtering. 90 tests passing.
+- Latest verified state: Agnostic decision scoring engine (`src/jevscout/scoring/`) with OpenRouter Decisions API support (`respan/span-01-lite:free` and `typesafe/jev-1.13`), offline heuristic mode, candidate profile matching, composite scoring (0–100), and filesystem evaluations storage. 104 tests passing.
 
 ## Current task and stopping point
 
-Browserless career site feed collection, discovery, and filtering is fully complete and verified across all 6 target ATS platforms (Greenhouse, Lever, Ashby, Breezy HR, Recruitee, Teamtailor) with strict India-only location rules (including India-eligible remote), quality/acronym guards, and CDX token harvesting. The test suite comprises 90 passing tests.
+The decision scoring pipeline is fully complete and verified with an agnostic module name (`src/jevscout/scoring/`). It supports:
+1. `OpenRouterDecisionClient` targeting `respan/span-01-lite:free` (free decision model) and `typesafe/jev-1.13` (paid/enterprise) via OpenRouter Decisions API (`POST /api/alpha/decisions`).
+2. `LocalHeuristicDecisionClient` for zero-network, zero-credential local evaluation and testing.
+3. Candidate profile modeling (`CandidateProfile`), typed rubrics builder (`rubrics.py`), and weighted composite scoring engine (`engine.py`) with recommendation tiers (`STRONG_MATCH`, `REVIEW`, `PASS`).
+4. CLI commands: `jevscout runs score <run_id>` and `jevscout runs evaluations <run_id>`.
+5. 104 passing tests with zero network required during automated test runs.
 
 Next steps for this workstream:
-1. JEV matching pipeline: candidate profile schema and composite scoring evaluation on extracted India postings.
-2. Token harvest script execution against Common Crawl S3 index to build curated Indian tech employer seeds.
+1. Curated employer seeds: execute token harvest script against Common Crawl S3 index to build Indian tech employer catalogs across the 6 ATS feeds.
+2. Web UI / Dashboard or batch evaluation reporting for top matched jobs.
 
 Implementation has begun with a zero-runtime-dependency Python package, filesystem run/artifact storage, and CLI pending-run create/show/list. Creating a record does not approve or execute a crawl. Read `CHANGELOG.md` and `docs/changes/` for behavior, test evidence, and limitations. Do not return to job-profile questions prematurely.
 

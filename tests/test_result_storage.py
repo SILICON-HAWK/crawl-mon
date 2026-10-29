@@ -56,6 +56,25 @@ class ExecutionAndResultStorageTests(unittest.TestCase):
                 {"schema_version": 1, "parser_version": "jsonld-jobs-v1", "items": items},
             )
 
+    def test_evaluations_round_trip_from_a_fresh_store(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = FileRunStore(Path(directory))
+            run = store.create(RunSpec(["https://example.test/jobs"]))
+            evaluations = [
+                {
+                    "job_id": "https://example.test/jobs/1",
+                    "job_title": "Senior Python Engineer",
+                    "composite_score": 88.5,
+                    "recommendation": "STRONG_MATCH",
+                    "model_name": "respan/span-01-lite:free",
+                }
+            ]
+            self.assertEqual(store.list_evaluations(run.id), [])
+            store.save_evaluations(run.id, evaluations)
+
+            reopened = FileRunStore(Path(directory))
+            self.assertEqual(reopened.list_evaluations(run.id), evaluations)
+
     def test_invalid_writes_preserve_prior_data_and_missing_runs_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             store = FileRunStore(Path(directory))

@@ -29,6 +29,9 @@ class RunStore(Protocol):
     def write_execution(self, run_id: str, payload: dict) -> None: ...
     def read_execution(self, run_id: str) -> dict | None: ...
     def save_results(self, run_id: str, items: list[dict]) -> None: ...
+    def list_results(self, run_id: str) -> list[dict]: ...
+    def save_evaluations(self, run_id: str, evaluations: list[dict]) -> None: ...
+    def list_evaluations(self, run_id: str) -> list[dict]: ...
 
 
 class ApprovalRequired(RuntimeError):
@@ -67,6 +70,63 @@ def extract_run(store: RunStore, run_id: str, india_only: bool = False) -> list[
             report["last_extracted_at"] = _now()
             store.write_execution(run_id, report)
         return items
+
+
+def score_run(
+    store: RunStore,
+    run_id: str,
+    profile: Any,
+    client: Any | None = None,
+    model: str | None = None,
+) -> list[dict]:
+    """Score extracted jobs from a run against candidate profile using decision client."""
+    from .scoring.client import OpenRouterDecisionClient
+    from .scoring.engine import JobMatchEngine
+
+    with store.operation_lock():
+        store.get(run_id)
+        results = store.list_results(run_id)
+        if not results:
+            results = extract_run(store, run_id)
+        if not results:
+            return []
+
+        if client is None:
+            client = OpenRouterDecisionClient(model=model or "respan/span-01-lite:free")
+
+        engine = JobMatchEngine(client=client)
+        evaluations = engine.evaluate_batch(profile, results, model=model)
+
+        serialized = []
+        for ev in evaluations:
+            dim_answers = {}
+            for k, ans in ev.dimension_answers.items():
+                if hasattr(ans, "noul"):
+                    dim_answers[k] = {"type": "noul", "noul": ans.noul}
+                elif hasattr(ans, "choice"):
+                    dim_answers[k] = {
+                        "type": "choice",
+                        "choice": ans.choice,
+                        "probabilities": getattr(ans, "probabilities", {}),
+                    }
+                elif hasattr(ans, "score"):
+                    dim_answers[k] = {
+                        "type": "score",
+                        "score": ans.score,
+                        "probabilities": getattr(ans, "probabilities", []),
+                    }
+            serialized.append({
+                "job_id": ev.job_id,
+                "job_title": ev.job_title,
+                "composite_score": ev.composite_score,
+                "recommendation": ev.recommendation.value,
+                "model_name": ev.model_name,
+                "dimension_answers": dim_answers,
+            })
+
+        store.save_evaluations(run_id, serialized)
+        logger.info("scoring completed run_id=%s count=%d", run_id, len(serialized))
+        return serialized
 
 
 async def execute_run(

@@ -5,9 +5,11 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from jevscout.application import execute_run
+from jevscout.application import execute_run, score_run
 from jevscout.engine import PageEvidence
 from jevscout.models import RunSpec
+from jevscout.scoring.client import LocalHeuristicDecisionClient
+from jevscout.scoring.models import CandidateProfile
 from jevscout.storage import FileRunStore
 
 
@@ -34,3 +36,36 @@ class ApplicationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(store.get(run.id).status, "partial")
             self.assertEqual(store.read_execution(run.id)["error"],
                              "collection timed out; extraction failed")
+
+    def test_score_run_evaluates_and_stores_results(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = FileRunStore(Path(directory))
+            run = store.create(RunSpec(["https://example.test/jobs"]))
+            jobs = [
+                {
+                    "title": "Senior Python Engineer",
+                    "location": "Bengaluru, India",
+                    "url": "https://example.test/job/1",
+                    "company": "TechIndia",
+                    "description": "FastAPI and PostgreSQL backend developer.",
+                }
+            ]
+            store.save_results(run.id, jobs)
+
+            profile = CandidateProfile(
+                role_target="Senior Python Engineer",
+                primary_skills=["Python", "FastAPI"],
+                experience_years=5.0,
+                preferred_locations=["Bengaluru"],
+            )
+            client = LocalHeuristicDecisionClient()
+            evaluations = score_run(store, run.id, profile, client=client)
+
+            self.assertEqual(len(evaluations), 1)
+            self.assertEqual(evaluations[0]["recommendation"], "STRONG_MATCH")
+            self.assertGreaterEqual(evaluations[0]["composite_score"], 75.0)
+
+            stored = store.list_evaluations(run.id)
+            self.assertEqual(len(stored), 1)
+            self.assertEqual(stored[0]["job_title"], "Senior Python Engineer")
+

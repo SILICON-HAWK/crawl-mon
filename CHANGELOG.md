@@ -2,6 +2,21 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Agnostic decision scoring engine & OpenRouter integration — 2026-10-29
+
+- Added provider-agnostic decision scoring module (`src/jevscout/scoring/`) supporting OpenRouter Decisions API (`POST https://openrouter.ai/api/alpha/decisions`).
+- Default model configured to free decision model `respan/span-01-lite:free` with full support for `typesafe/jev-1.13` and other decision models via `--model`.
+- Added typed decision primitives (`NoulAnswer`, `ChoiceAnswer`, `ScoreAnswer`), `CandidateProfile`, and `JobMatchEvaluation`.
+- Implemented match rubrics (`rubrics.py`) for location compatibility (`noul`), seniority fit (`choice`), and tech stack alignment (`score`).
+- Added composite scoring engine (`engine.py`) computing normalized 0–100 match ratings with categorical recommendation tiers (`STRONG_MATCH`, `REVIEW`, `PASS`).
+- Added `LocalHeuristicDecisionClient` for 100% offline development, testing, and deterministic evaluation without requiring external keys or network.
+- Added storage persistence for match evaluations (`save_evaluations`, `list_evaluations`) in `FileRunStore`.
+- Added CLI subcommands `runs score` and `runs evaluations` with `--offline`, `--role`, `--skills`, `--locations`, `--remote-only`, and `--profile-json` flags.
+- Added end-to-end integration test from career feed scraping through India extraction to decision model scoring.
+
+Verification: 104 passing tests across full suite (`PYTHONPATH=src .venv/bin/python -m unittest discover -s tests`). Agent note: `docs/changes/decision-scoring.md`. Zero network required during automated tests.
+
+
 ## Complete 6-provider ATS feeds, token harvesting and quality guards — 2026-10-29
 
 - Added browserless public feed adapters for all 6 verified ATS platforms: Greenhouse, Lever, Ashby, Breezy HR, Recruitee, and Teamtailor.

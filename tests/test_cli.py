@@ -112,6 +112,44 @@ class CliTests(unittest.TestCase):
                     self.assertNotIn("Traceback", result.stderr)
                     self.assertIn("error", result.stderr.lower())
 
+    def test_cli_score_and_evaluations_with_offline_heuristic(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            created = invoke(data_dir, "runs", "create", "--seed", "https://example.test")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            run_id = json.loads(created.stdout)["id"]
+
+            # Save sample results
+            from jevscout.storage import FileRunStore
+            store = FileRunStore(data_dir)
+            store.save_results(run_id, [{
+                "title": "Senior Python Developer",
+                "location": "Bengaluru, India",
+                "description": "FastAPI engineer",
+            }])
+
+            score_res = invoke(
+                data_dir,
+                "runs",
+                "score",
+                run_id,
+                "--offline",
+                "--role",
+                "Senior Python Developer",
+                "--skills",
+                "Python,FastAPI",
+                "--locations",
+                "Bengaluru",
+            )
+            self.assertEqual(score_res.returncode, 0, score_res.stderr)
+            evals = json.loads(score_res.stdout)
+            self.assertEqual(len(evals), 1)
+            self.assertEqual(evals[0]["recommendation"], "STRONG_MATCH")
+
+            list_res = invoke(data_dir, "runs", "evaluations", run_id)
+            self.assertEqual(list_res.returncode, 0, list_res.stderr)
+            self.assertEqual(json.loads(list_res.stdout), evals)
+
 
 if __name__ == "__main__":
     unittest.main()
