@@ -2,6 +2,16 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Career site feeds and India-only filtering — 2026-10-29
+
+- Added browserless public feed adapters for Greenhouse, Lever, and Ashby ATS endpoints with automatic format detection.
+- Added strict India location filtering and canonical hub normalization (Bengaluru, Hyderabad, Pune, Mumbai, Gurgaon, Noida, Delhi NCR, Chennai, Kochi, Kolkata, Ahmedabad) and India-eligible remote roles (`"India - Remote"`, `"Worldwide Remote"`, `"Anywhere in the world"`).
+- Strictly rejects overseas locations (US, UK, Germany, Canada, Singapore, etc.) and non-India restricted remotes (`"Remote - US Only"`, `"Remote - EMEA"`, etc.).
+- Integrated feed extraction into core `parse_jobs` and application `extract_run` with `--india-only` flag on `runs results` and `runs extract`.
+
+Verification: 68 passing tests across unit, integration, and CLI suites (`PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v`). Agent note: `career-feeds.md`. No third-party network or paid APIs used.
+
+
 ## Collection foundations — 2026-10-29
 
 - Added pure JSON-LD JobPosting extraction from saved HTML, including arrays and `@graph`, explicit unknown fields, HTML description cleanup, and source/artifact provenance.

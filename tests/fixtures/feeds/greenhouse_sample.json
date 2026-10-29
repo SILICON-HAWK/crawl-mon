@@ -1,0 +1,84 @@
+{
+  "jobs": [
+    {
+      "id": 101,
+      "title": "Staff Platform Engineer",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/101",
+      "location": {
+        "name": "Bengaluru, Karnataka, India"
+      },
+      "departments": [
+        {"id": 1, "name": "Infrastructure"}
+      ],
+      "offices": [
+        {"id": 10, "name": "Bengaluru", "location": "Bengaluru, India"}
+      ],
+      "content": "&lt;p&gt;Lead distributed systems in Bengaluru.&lt;/p&gt;"
+    },
+    {
+      "id": 102,
+      "title": "Senior Backend Engineer",
+      "updated_at": "2026-10-27T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/102",
+      "location": {
+        "name": "Pune, Maharashtra, India"
+      },
+      "departments": [
+        {"id": 2, "name": "Backend"}
+      ],
+      "offices": [
+        {"id": 11, "name": "Pune", "location": "Pune, India"}
+      ],
+      "content": "<p>Build high-throughput APIs in Pune.</p>"
+    },
+    {
+      "id": 103,
+      "title": "Frontend Architect",
+      "updated_at": "2026-10-26T09:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/103",
+      "location": {
+        "name": "India - Remote"
+      },
+      "departments": [
+        {"id": 3, "name": "Frontend"}
+      ],
+      "offices": [
+        {"id": 12, "name": "Remote India", "location": "India"}
+      ],
+      "content": "<p>Work anywhere in India on React architecture.</p>"
+    },
+    {
+      "id": 104,
+      "title": "US Product Manager",
+      "updated_at": "2026-10-25T08:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/104",
+      "location": {
+        "name": "San Francisco, CA"
+      },
+      "departments": [
+        {"id": 4, "name": "Product"}
+      ],
+      "offices": [
+        {"id": 13, "name": "San Francisco", "location": "USA"}
+      ],
+      "content": "<p>Product strategy in SF.</p>"
+    },
+    {
+      "id": 105,
+      "title": "US Only Remote Engineer",
+      "updated_at": "2026-10-24T08:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/105",
+      "location": {
+        "name": "Remote (US Only)"
+      },
+      "departments": [
+        {"id": 1, "name": "Engineering"}
+      ],
+      "offices": [
+        {"id": 14, "name": "Remote US", "location": "USA"}
+      ],
+      "content": "<p>US remote role.</p>"
+    }
+  ]
+}

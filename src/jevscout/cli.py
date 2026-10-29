@@ -41,6 +41,12 @@ def _parser() -> argparse.ArgumentParser:
     for action in ("pages", "results", "extract", "report"):
         command = actions.add_parser(action, help=f"{action} for a saved run")
         command.add_argument("run_id")
+        if action in ("results", "extract"):
+            command.add_argument(
+                "--india-only",
+                action="store_true",
+                help="strictly filter for jobs located in India or India-eligible remote",
+            )
     artifact = actions.add_parser("artifact", help="read saved page evidence")
     artifact.add_argument("run_id")
     artifact.add_argument("--ref", required=True)
@@ -92,10 +98,14 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "pages":
             _emit(store.list_pages(args.run_id))
         elif args.action == "results":
-            _emit(store.list_results(args.run_id))
+            results = store.list_results(args.run_id)
+            if getattr(args, "india_only", False):
+                from .feeds.location import is_india_eligible
+                results = [r for r in results if r.get("is_india") or is_india_eligible(r.get("location"))]
+            _emit(results)
         elif args.action == "extract":
             from .application import extract_run
-            _emit(extract_run(store, args.run_id))
+            _emit(extract_run(store, args.run_id, india_only=getattr(args, "india_only", False)))
         elif args.action == "report":
             _emit(store.read_execution(args.run_id))
         elif args.action == "artifact":

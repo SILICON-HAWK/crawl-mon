@@ -4,13 +4,16 @@
 
 - Project and Git root: `/home/abhi/work/jevscout`. Run project commands here, not in `/home/abhi/work`.
 - Repository: https://github.com/SILICON-HAWK/crawl-mon
-- Branch: `main`; SSH remote: `git@github.com:SILICON-HAWK/crawl-mon.git`.
-- Last verified published commit: `27769f9`. Subsequent local commits include architecture/skills and filesystem-first implementation planning; inspect `git log` and remote tracking state for the latest commit/publication status. The existing repository license was preserved.
-- This handoff is intentionally in the project folder at the user's request, overriding the handoff skill's temporary-directory default. Check Git history/status for subsequent commits and publication state.
+- Active Branch: `gemini/feature/job-portal` (tracking `origin/gemini/feature/job-portal`).
+- Latest verified state: Browserless career feeds (Greenhouse, Lever, Ashby) implemented with strict India location filtering (`is_india_eligible`, `normalize_india_location`), auto-detection registry, and CLI integration (`--india-only`). 68 tests passing.
 
 ## Current task and stopping point
 
-An active user goal now authorizes finishing a sensible collection-first end-to-end slice. Foundation work adds JobPosting JSON-LD extraction, versioned result/execution persistence, a local operation lock, and explicit loopback-fixture permission. Crawlee 1.11.0 is installed locally as an optional extra. The real-CLI happy path has passed, including re-extraction after the fixture server stops. Integration work remains active: timeout/Ctrl+C checks exposed Crawlee swallowing cancellation and must be fixed and verified before marking completion. Read the latest changelog and test output; do not mistake foundation commits for full milestone completion.
+Browserless career site feed extraction is complete and verified across all target ATS endpoints (Greenhouse, Lever, Ashby) with strict India-only location rules (including India-eligible remote). The test suite comprises 68 passing tests.
+
+Next steps for this workstream:
+1. Seed expansion / discovery: Curating Indian tech employer board tokens / career URLs (e.g., Postman, InMobi, Razorpay, Zepto, CRED, Atlassian India, Stripe India).
+2. JEV matching pipeline: candidate profile schema and composite scoring evaluation on extracted India postings.
 
 Implementation has begun with a zero-runtime-dependency Python package, filesystem run/artifact storage, and CLI pending-run create/show/list. Creating a record does not approve or execute a crawl. Read `CHANGELOG.md` and `docs/changes/` for behavior, test evidence, and limitations. Do not return to job-profile questions prematurely.
 

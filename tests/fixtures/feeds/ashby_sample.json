@@ -1,0 +1,75 @@
+{
+  "apiVersion": "0.1",
+  "jobs": [
+    {
+      "id": "ashby-101",
+      "title": "Software Engineer, Core Systems",
+      "location": "Bengaluru, India",
+      "secondaryLocations": [
+        {"location": "Hyderabad, India"}
+      ],
+      "department": "Engineering",
+      "employmentType": "FullTime",
+      "isRemote": false,
+      "jobUrl": "https://jobs.ashbyhq.com/modernai/ashby-101",
+      "publishedAt": "2026-10-25T14:30:00.000Z",
+      "descriptionHtml": "<p>Build high performance distributed systems in Bengaluru.</p>",
+      "compensation": {
+        "compensationTierSummary": "₹35,00,000 - ₹55,00,000"
+      }
+    },
+    {
+      "id": "ashby-102",
+      "title": "Senior AI Infrastructure Engineer",
+      "location": "Worldwide Remote",
+      "secondaryLocations": [],
+      "department": "AI Labs",
+      "employmentType": "FullTime",
+      "isRemote": true,
+      "jobUrl": "https://jobs.ashbyhq.com/modernai/ashby-102",
+      "publishedAt": "2026-10-26T10:00:00.000Z",
+      "descriptionHtml": "<p>Train foundation models from anywhere in the world.</p>",
+      "compensation": {
+        "compensationTierSummary": "$180,000 - $220,000"
+      }
+    },
+    {
+      "id": "ashby-103",
+      "title": "Full Stack Engineer (Global)",
+      "location": "San Francisco, CA",
+      "secondaryLocations": [
+        {"location": "Bengaluru, India"}
+      ],
+      "department": "Product",
+      "employmentType": "FullTime",
+      "isRemote": true,
+      "jobUrl": "https://jobs.ashbyhq.com/modernai/ashby-103",
+      "publishedAt": "2026-10-27T08:00:00.000Z",
+      "descriptionHtml": "<p>Build web applications across SF and Bengaluru.</p>"
+    },
+    {
+      "id": "ashby-104",
+      "title": "Enterprise Sales Director",
+      "location": "New York, NY",
+      "secondaryLocations": [],
+      "department": "Sales",
+      "employmentType": "FullTime",
+      "isRemote": false,
+      "jobUrl": "https://jobs.ashbyhq.com/modernai/ashby-104",
+      "publishedAt": "2026-10-24T12:00:00.000Z",
+      "descriptionHtml": "<p>Lead NYC enterprise sales.</p>"
+    },
+    {
+      "id": "ashby-105",
+      "title": "US Only Recruiter",
+      "location": "Remote (US Only)",
+      "secondaryLocations": [],
+      "department": "People",
+      "employmentType": "FullTime",
+      "isRemote": true,
+      "jobUrl": "https://jobs.ashbyhq.com/modernai/ashby-105",
+      "publishedAt": "2026-10-23T12:00:00.000Z",
+      "descriptionHtml": "<p>Internal recruiting in North America.</p>"
+    }
+  ]
+}

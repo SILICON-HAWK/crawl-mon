@@ -39,27 +39,28 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _extract(store: RunStore, run_id: str) -> list[dict]:
+def _extract(store: RunStore, run_id: str, india_only: bool = False) -> list[dict]:
     items = []
     for page in store.list_pages(run_id):
-        # Only successful HTML pages are candidates for job extraction.
+        # Only successful HTML pages and feeds are candidates for job extraction.
         status = page["metadata"].get("status_code", 0)
         if not 200 <= status < 300:
             continue
         items.extend(parse_jobs(store.read_artifact(run_id, page["artifact_ref"]),
-                                page["url"], page["artifact_ref"]))
+                                page["url"], page["artifact_ref"],
+                                india_only=india_only))
     store.save_results(run_id, items)
     logger.info("extraction completed run_id=%s items=%d", run_id, len(items))
     return items
 
 
-def extract_run(store: RunStore, run_id: str) -> list[dict]:
+def extract_run(store: RunStore, run_id: str, india_only: bool = False) -> list[dict]:
     """Re-extract saved evidence without loading a crawler or making requests."""
     with store.operation_lock():
         record = store.get(run_id)
         if record.status in {"pending", "running"}:
             raise RuntimeError("run must finish collection before extraction")
-        items = _extract(store, run_id)
+        items = _extract(store, run_id, india_only=india_only)
         report = store.read_execution(run_id)
         if report is not None:
             report["items_extracted"] = len(items)
