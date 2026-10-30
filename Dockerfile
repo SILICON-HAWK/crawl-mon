@@ -28,8 +28,9 @@ ENTRYPOINT ["jevscout"]
 CMD ["--help"]
 
 FROM runtime AS test
+ENV JEVSCOUT_CONTAINER_TEST=1
 COPY --chown=10001:10001 tests ./tests
 ENTRYPOINT ["python", "-m", "unittest"]
-CMD ["discover", "-s", "tests", "-v"]
+CMD ["discover", "-s", "tests", "-t", ".", "-v"]
 
 FROM runtime AS final

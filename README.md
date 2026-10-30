@@ -29,7 +29,7 @@ jevscout --data-dir ./data runs list
 Run the dependency-free behavior checks:
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 -m unittest discover -s tests -t . -v
 ```
 
 Run records and saved artifacts live under `data/`, which is excluded from Git. Use a trusted local storage directory with one writer. Filesystem persistence does not implement a shared task queue, background execution, multi-container coordination, or crash resume. PostgreSQL and a maintained queue backend are deferred. See [Changelog](CHANGELOG.md) for verified slice status and [Execution plan](docs/execution-plan.md) for remaining work.
@@ -38,7 +38,7 @@ Install the optional HTTP collection dependency set and run all collection check
 
 ```bash
 python3 -m pip install -e '.[crawl]'
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -t . -v
 ```
 
 Use a virtual environment for package installation. Core record/query/parser operations remain dependency-free; collection tests are skipped when the optional Crawlee extra is absent. No browser downloads or database are required for this HTTP-only slice.
@@ -67,3 +67,5 @@ Use a virtual environment for package installation. Core record/query/parser ope
 ## Start here
 
 Python and Crawlee are selected. Start with local filesystem persistence, then CLI-driven collection, saved evidence, structured extraction, and inspection; add JEV afterward. The target architecture is containerizable, with a focused core library, CLI/MCP/API adapters, bounded workers, persistent runs, and an optional results UI. PostgreSQL is the intended later backend. Target-site feasibility is validated separately.
+
+See [Subsystem test suites](tests/README.md) for core, crawler, database, Docker, and utility checks.

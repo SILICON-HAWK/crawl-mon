@@ -11,7 +11,7 @@ import time
 @contextmanager
 def fixture_site():
     hits = Counter()
-    jobs = (Path(__file__).parent / "fixtures" / "jobs.html").read_bytes()
+    jobs = (Path(__file__).resolve().parents[1] / "fixtures" / "jobs.html").read_bytes()
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):

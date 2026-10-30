@@ -15,7 +15,7 @@ class FeedIntegrationTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.data_dir = Path(self.tmp.name)
         self.store = FileRunStore(self.data_dir)
-        self.fixtures_dir = Path(__file__).parent / "fixtures" / "feeds"
+        self.fixtures_dir = Path(__file__).resolve().parents[1] / "fixtures" / "feeds"
 
     def tearDown(self):
         self.tmp.cleanup()

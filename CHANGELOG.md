@@ -2,6 +2,12 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Subsystem test organization — 2026-10-30
+
+- Grouped tests into core, crawler, CLI, filesystem storage, database, feeds, scoring, utilities, and Docker packages; centralized shared fixture support.
+- Preserved all existing tests and added a non-root Docker packaging smoke check. Updated discovery commands and test documentation.
+- Full Docker suite: 124 tests passed, no skips (63.646s). No application logic changed.
+
 ## Regression stabilization — 2026-10-30
 
 Validation: rebuilt app/test images; `docker compose run --rm test` passed all 123 tests in 50.846s with no skips, including live PostgreSQL, crawler fixture, CLI, and regression checks.

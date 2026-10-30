@@ -13,7 +13,7 @@ from jevscout.postgres import PostgresRunStore
 
 
 DATABASE_URL = os.environ.get("JEVSCOUT_TEST_DATABASE_URL")
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 @unittest.skipUnless(DATABASE_URL, "requires JEVSCOUT_TEST_DATABASE_URL")

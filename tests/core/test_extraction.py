@@ -4,7 +4,7 @@ from pathlib import Path
 from jevscout.extraction import parse_jobs
 
 
-FIXTURE = Path(__file__).parent / "fixtures" / "jobs.html"
+FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "jobs.html"
 
 
 class ParseJobsTests(unittest.TestCase):

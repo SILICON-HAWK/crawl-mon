@@ -11,8 +11,8 @@ import tempfile
 import time
 import unittest
 
-from fixture_site import fixture_site
-from test_cli import invoke
+from tests.support.fixture_site import fixture_site
+from tests.cli.test_cli import invoke
 
 
 @unittest.skipUnless(importlib.util.find_spec("crawlee"), "install .[crawl] for collection checks")
@@ -100,7 +100,7 @@ class CollectionCliTests(unittest.TestCase):
             created = invoke(root, "runs", "create", "--seed", origin + "/slow", "--allow-local")
             run_id = json.loads(created.stdout)["id"]
             env = os.environ.copy()
-            env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
+            env["PYTHONPATH"] = str(Path(__file__).resolve().parents[2] / "src")
             process = subprocess.Popen([sys.executable, "-m", "jevscout", "--data-dir", str(root),
                                         "runs", "execute", run_id, "--approve"],
                                        env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

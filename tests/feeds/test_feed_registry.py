@@ -6,7 +6,7 @@ from jevscout.feeds.registry import detect_feed_type, detect_and_parse_feed
 
 class FeedRegistryTests(unittest.TestCase):
     def setUp(self):
-        fixtures_dir = Path(__file__).parent / "fixtures" / "feeds"
+        fixtures_dir = Path(__file__).resolve().parents[1] / "fixtures" / "feeds"
         self.gh_payload = (fixtures_dir / "greenhouse_sample.json").read_text(encoding="utf-8")
         self.lever_payload = (fixtures_dir / "lever_sample.json").read_text(encoding="utf-8")
         self.ashby_payload = (fixtures_dir / "ashby_sample.json").read_text(encoding="utf-8")

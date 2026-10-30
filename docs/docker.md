@@ -63,7 +63,7 @@ Use a disposable Compose project so integration runs do not populate your app da
 
 ```sh
 docker compose -p jevscout-test build test
-docker compose -p jevscout-test run --rm test discover -s tests -p test_postgres.py -v
+docker compose -p jevscout-test run --rm test discover -s tests/db -t . -v
 docker compose -p jevscout-test run --rm test
 ```
 

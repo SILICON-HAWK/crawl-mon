@@ -12,7 +12,7 @@ from jevscout.scoring.client import LocalHeuristicDecisionClient
 from jevscout.scoring.engine import JobMatchEngine
 from jevscout.scoring.models import CandidateProfile, JobPosting
 from jevscout.storage import FileRunStore
-from test_cli import invoke
+from tests.cli.test_cli import invoke
 
 
 PROFILE = CandidateProfile('Engineer', ['Python'], 3, ['India'])

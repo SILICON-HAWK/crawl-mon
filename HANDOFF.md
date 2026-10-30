@@ -1,3 +1,7 @@
+Latest test-layout verification: all 124 Docker tests passed with no skips (63.646s).
+
+Tests are organized by subsystem under `tests/`; see `tests/README.md`. Use `PYTHONPATH=src python3 -m unittest discover -s tests -t . -v`, or select a subsystem folder. The Docker test target runs every dependency-backed suite plus a packaging smoke check. Earlier flat-file test commands below are historical.
+
 Latest stabilization verification: all 123 Docker tests passed with no skips (50.846s), including live PostgreSQL and controlled-fixture collection. App/test images rebuilt. The earlier failing-suite counts below are historical. Live external provider compatibility was not exercised.
 
 # Current integration update — 2026-10-30
