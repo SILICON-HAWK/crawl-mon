@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-jevscout}
+      POSTGRES_USER: ${POSTGRES_USER:-jevscout}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jevscout_dev}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  app:
+    build:
+      context: .
+      secrets:
+        - proxy_ca
+    environment:
+      JEVSCOUT_DATABASE_URL: postgresql://${POSTGRES_USER:-jevscout}:${POSTGRES_PASSWORD:-jevscout_dev}@db:5432/${POSTGRES_DB:-jevscout}
+      JEVSCOUT_DATA_DIR: /data
+      SSL_CERT_FILE: /run/secrets/runtime_ca
+      REQUESTS_CA_BUNDLE: /run/secrets/runtime_ca
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app_data:/data
+    secrets:
+      - source: proxy_ca
+        target: runtime_ca
+        mode: 0444
+    profiles: ["cli"]
+
+  test:
+    build:
+      context: .
+      target: test
+      secrets:
+        - proxy_ca
+    environment:
+      JEVSCOUT_TEST_DATABASE_URL: postgresql://${POSTGRES_USER:-jevscout}:${POSTGRES_PASSWORD:-jevscout_dev}@db:5432/${POSTGRES_DB:-jevscout}
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["test"]
+
+volumes:
+  postgres_data:
+  app_data:
+
+secrets:
+  proxy_ca:
+    file: ${CODEX_PROXY_CERT:-/etc/ssl/certs/ca-certificates.crt}

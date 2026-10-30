@@ -1,5 +1,7 @@
 # Execution plan
 
+Latest update (2026-10-30): Docker and initial PostgreSQL persistence are now authorized. Keep synchronous operations and the existing filesystem option; background queues and workers remain deferred. See `docker.md` for setup and integration checks.
+
 Status: execution started under the user's filesystem-first override. Public run-spec/store and CLI submission/query behavior are the implemented first slice; collection, extraction, and JEV remain upcoming. Follow the filesystem-first update below before the original target-state phases.
 
 ## Filesystem-first execution update

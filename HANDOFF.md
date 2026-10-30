@@ -1,3 +1,10 @@
+# Current integration update — 2026-10-30
+
+Work is on `codex/integration/docker`, branched from `gemini/feature/job-portal`.
+The user authorized Docker packaging and the first PostgreSQL integration, superseding the earlier postponement below. Filesystem storage remains available by default. Set `JEVSCOUT_DATABASE_URL` for PostgreSQL and explicitly run `jevscout db init`. See `docs/docker.md` for non-root runtime/test images and Compose commands. PostgreSQL holds metadata and page evidence; local storage holds engine workspaces. No filesystem import, worker queue, or crash-resume support is included.
+
+The prior tests-only changes remain present: known failing regressions cover filesystem nested locking, India filtering, and application-URL evaluation identities. Do not mistake these for new database failures or silently fix them as deployment work. `tests/test_postgres.py` requires a disposable database URL in `JEVSCOUT_TEST_DATABASE_URL`.
+
 # JevScout handoff
 
 ## Workspace and repository
@@ -68,3 +75,5 @@ The environment is WSL Debian. Earlier push failures came from restricted sandbo
 Successful fetch/push commands used the execution tool's approved `require_escalated` mode. If a new session encounters the same sandbox-related SSH/network failure, follow its active permission instructions and request escalation where allowed. Do not assume a fresh session has identical permissions.
 
 No credentials belong in this document or project. Run data, artifacts, environments, and generated build metadata are ignored by Git. Atomic replacement prevents partially written individual files from normal interrupted writes; it is not a multi-file transaction, a power-loss guarantee, a job queue, or crash resume. Use a trusted local directory with one writer.
+
+Full Docker verification: `docker compose run --rm test` ran 121 tests in 51.873s with no skips: 115 passing test methods, six known regression methods failing (40 subtest/assertion failures and two lock errors). No new integration failures.

@@ -2,6 +2,14 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Docker and initial PostgreSQL storage — 2026-10-30
+
+- Added non-root Python CLI runtime and test images, Compose PostgreSQL 17 service, persistent volumes, readiness checks, and build/runtime CA mounting. See `docs/docker.md`.
+- Added optional `postgres` dependency and a PostgreSQL adapter storing runs, evidence, execution reports, results, and evaluations. Database-wide advisory locking coordinates synchronous operations across workspace roots; nested operations on one store are supported.
+- CLI selects PostgreSQL using `JEVSCOUT_DATABASE_URL`; `db init` explicitly initializes schema version 1. `JEVSCOUT_DATA_DIR` configures filesystem data or engine workspaces. Filesystem remains the default.
+- Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
+- No background queue, filesystem import, crash-resume guarantee, or external publication is included.
+
 ## Agnostic decision scoring engine & OpenRouter integration — 2026-10-29
 
 - Added provider-agnostic decision scoring module (`src/jevscout/scoring/`) supporting OpenRouter Decisions API (`POST https://openrouter.ai/api/alpha/decisions`).
@@ -61,3 +69,5 @@ Limits: one trusted local writer, no application queue, no background execution,
 - Added the phased execution plan and clarified that database-first steps are superseded by the filesystem-first slice.
 
 Verification: documentation whitespace checks. No application checks at this checkpoint.
+
+Full Docker verification: `docker compose run --rm test` ran 121 tests in 51.873s with no skips: 115 passing test methods, six known regression methods failing (40 subtest/assertion failures and two lock errors). No new integration failures.

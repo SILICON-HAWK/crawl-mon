@@ -27,6 +27,13 @@ def invoke(data_dir: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 class CliTests(unittest.TestCase):
+    def test_database_init_requires_explicit_database_configuration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = invoke(Path(directory), "db", "init")
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("JEVSCOUT_DATABASE_URL", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
     def test_create_then_show_and_list_persist_pending_spec(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             data_dir = Path(directory)

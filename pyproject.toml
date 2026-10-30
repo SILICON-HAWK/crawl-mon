@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
+postgres = ["psycopg[binary]==3.2.13"]
 crawl = [
     "crawlee[beautifulsoup,httpx]==1.11.0",
     "httpx2==2.16.0",

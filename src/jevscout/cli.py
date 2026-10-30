@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -16,9 +17,12 @@ logger = logging.getLogger("jevscout.cli")
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="jevscout")
-    parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--data-dir", type=Path, default=Path(os.environ.get("JEVSCOUT_DATA_DIR", "data")))
     parser.add_argument("--debug", action="store_true", help="enable diagnostic logging")
     commands = parser.add_subparsers(dest="area", required=True)
+
+    database = commands.add_parser("db", help="manage PostgreSQL storage")
+    database.add_subparsers(dest="action", required=True).add_parser("init", help="initialize storage schema")
 
     runs = commands.add_parser("runs", help="submit or inspect runs")
     actions = runs.add_subparsers(dest="action", required=True)
@@ -82,7 +86,19 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     try:
-        store = FileRunStore(args.data_dir)
+        database_url = os.environ.get("JEVSCOUT_DATABASE_URL")
+        if args.area == "db" and not database_url:
+            logger.error("db init requires JEVSCOUT_DATABASE_URL")
+            return 2
+        if database_url:
+            from .postgres import PostgresRunStore
+            store = PostgresRunStore(database_url, args.data_dir)
+        else:
+            store = FileRunStore(args.data_dir)
+        if args.area == "db":
+            store.initialize_schema()
+            _emit({"backend": "postgres", "schema_version": 1})
+            return 0
         if args.area != "runs":
             parser.error("unsupported command")
         if args.action == "create":
@@ -172,7 +188,7 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("unable to access run storage")
         return 1
     except ImportError:
-        logger.error("collection dependencies unavailable; install jevscout with the [crawl] extra")
+        logger.error("optional dependencies unavailable; install jevscout with the [crawl] or [postgres] extra")
         return 1
     except RuntimeError:
         logger.error("operation unavailable: approval, pending status or exclusive access required")
