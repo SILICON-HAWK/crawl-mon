@@ -67,8 +67,8 @@ docker compose -p jevscout-test run --rm test discover -s tests -p test_postgres
 docker compose -p jevscout-test run --rm test
 ```
 
-The full suite currently includes intentionally failing regressions for filesystem
-scoring locks, India location filtering, and application-URL identity. These
-pre-existing issues are separate from the PostgreSQL integration checks.
+The full suite includes regression coverage for filesystem scoring locks, India
+location filtering, and application-URL identity, alongside PostgreSQL and
+controlled-fixture crawler checks.
 Test runs add records; remove the disposable project's volumes only when finished
 with its test data. No automatic filesystem-to-database migration is provided.

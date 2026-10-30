@@ -85,3 +85,29 @@ class IndiaLocationFilterTests(unittest.TestCase):
         self.assertFalse(is_india_eligible("   "))
         self.assertIsNone(normalize_india_location(None))
         self.assertIsNone(normalize_india_location(""))
+
+    def test_rejects_english_in_and_indiana_as_india_evidence(self):
+        for location in ('Remote in Germany', 'Office in Singapore', 'Indianapolis, IN'):
+            for raw in (location, location.lower(), location.upper(), '  ' + location + '  '):
+                for workplace_type in (None, 'remote'):
+                    with self.subTest(location=raw, workplace_type=workplace_type, check='eligibility'):
+                        self.assertFalse(is_india_eligible(raw, workplace_type=workplace_type))
+                with self.subTest(location=raw, check='normalization'):
+                    self.assertIsNone(normalize_india_location(raw))
+
+    def test_explicit_india_and_worldwide_remain_eligible_with_in(self):
+        for raw, expected in (
+            ('Remote in India', 'India - Remote'),
+            ('  remote IN INDIA  ', 'India - Remote'),
+            ('Office in Bengaluru', 'Bengaluru, India'),
+            ('Anywhere in the world', 'Worldwide Remote'),
+        ):
+            with self.subTest(location=raw):
+                self.assertTrue(is_india_eligible(raw))
+                self.assertEqual(normalize_india_location(raw), expected)
+
+    def test_standalone_country_code_is_distinct_from_prose_or_state_suffix(self):
+        self.assertTrue(is_india_eligible('IN'))
+        self.assertEqual(normalize_india_location(' IN '), 'India')
+        self.assertFalse(is_india_eligible('in'))
+        self.assertFalse(is_india_eligible('Indianapolis, IN'))

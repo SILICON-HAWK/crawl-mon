@@ -42,7 +42,9 @@ INDIA_HUBS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\b(indore)\b", re.IGNORECASE), "Indore"),
 ]
 
-INDIA_COUNTRY_REGEX = re.compile(r"\b(india|\bIN\b)\b", re.IGNORECASE)
+# Accept the India name anywhere, but treat "IN" as a country code only when
+# it is the entire location field and uppercase.
+INDIA_COUNTRY_REGEX = re.compile(r"(?i:\bindia\b)|\A\s*IN\s*\Z")
 
 
 def is_india_eligible(location: str | None, workplace_type: str | None = None) -> bool:
@@ -56,8 +58,10 @@ def is_india_eligible(location: str | None, workplace_type: str | None = None) -
     if RESTRICTED_REMOTE_REGEX.search(clean_loc):
         return False
 
+    has_india = INDIA_COUNTRY_REGEX.search(clean_loc) is not None
+
     # Check for India explicit remote first
-    if INDIA_COUNTRY_REGEX.search(clean_loc) and "remote" in clean_loc.lower():
+    if has_india and "remote" in clean_loc.lower():
         return True
 
     # Check for broad worldwide / global remote
@@ -65,7 +69,7 @@ def is_india_eligible(location: str | None, workplace_type: str | None = None) -
         return True
 
     # If it contains foreign locations/countries without India, reject
-    if FOREIGN_LOCATION_REGEX.search(clean_loc) and not INDIA_COUNTRY_REGEX.search(clean_loc):
+    if FOREIGN_LOCATION_REGEX.search(clean_loc) and not has_india:
         return False
 
     # Check if any known Indian tech hub or state is mentioned
@@ -73,12 +77,12 @@ def is_india_eligible(location: str | None, workplace_type: str | None = None) -
         if pattern.search(clean_loc):
             return True
 
-    # Check if India country or abbreviation is present
-    if INDIA_COUNTRY_REGEX.search(clean_loc):
+    # Check if the India country name or country-only code is present
+    if has_india:
         return True
 
     # If workplace type is remote/hybrid and location is simply India
-    if workplace_type and workplace_type.lower() in ("remote", "hybrid") and INDIA_COUNTRY_REGEX.search(clean_loc):
+    if workplace_type and workplace_type.lower() in ("remote", "hybrid") and has_india:
         return True
 
     return False

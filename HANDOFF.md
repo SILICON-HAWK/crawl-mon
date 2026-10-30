@@ -1,9 +1,11 @@
+Latest stabilization verification: all 123 Docker tests passed with no skips (50.846s), including live PostgreSQL and controlled-fixture collection. App/test images rebuilt. The earlier failing-suite counts below are historical. Live external provider compatibility was not exercised.
+
 # Current integration update — 2026-10-30
 
 Work is on `codex/integration/docker`, branched from `gemini/feature/job-portal`.
 The user authorized Docker packaging and the first PostgreSQL integration, superseding the earlier postponement below. Filesystem storage remains available by default. Set `JEVSCOUT_DATABASE_URL` for PostgreSQL and explicitly run `jevscout db init`. See `docs/docker.md` for non-root runtime/test images and Compose commands. PostgreSQL holds metadata and page evidence; local storage holds engine workspaces. No filesystem import, worker queue, or crash-resume support is included.
 
-The prior tests-only changes remain present: known failing regressions cover filesystem nested locking, India filtering, and application-URL evaluation identities. Do not mistake these for new database failures or silently fix them as deployment work. `tests/test_postgres.py` requires a disposable database URL in `JEVSCOUT_TEST_DATABASE_URL`.
+The prior tests-only regressions are now fixed under the user’s stabilization request: filesystem scoring uses one operation lock, India filtering distinguishes country names/codes from prose and US state suffixes, and evaluation identities retain application URLs. `tests/test_postgres.py` requires a disposable database URL in `JEVSCOUT_TEST_DATABASE_URL`.
 
 # JevScout handoff
 

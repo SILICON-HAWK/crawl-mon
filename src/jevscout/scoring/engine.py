@@ -96,11 +96,11 @@ class JobMatchEngine:
         else:
             recommendation = RecommendationTier.PASS
 
-        job_id = (
-            job.get("id") or job.get("url") or job.get("title", "unknown")
-            if isinstance(job, dict)
-            else (job.url or job.title)
-        )
+        if isinstance(job, dict):
+            job_id = (job.get("id") or job.get("url") or job.get("application_url")
+                      or job.get("title", "unknown"))
+        else:
+            job_id = job.url or job.title
         job_title = job.get("title", "") if isinstance(job, dict) else job.title
         model_name = getattr(self.client, "model", model or "unknown_model")
 

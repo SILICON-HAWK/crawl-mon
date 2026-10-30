@@ -2,6 +2,15 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Regression stabilization — 2026-10-30
+
+Validation: rebuilt app/test images; `docker compose run --rm test` passed all 123 tests in 50.846s with no skips, including live PostgreSQL, crawler fixture, CLI, and regression checks.
+
+- Fixed automatic extraction during scoring to hold one storage lock while retaining terminal-run validation and execution-report updates.
+- India filtering distinguishes the country name and standalone uppercase country code from English prose and US state abbreviations.
+- Evaluation IDs now retain application URLs when explicit IDs and legacy URL fields are absent; duplicate titles no longer collapse distinct posting identities.
+- Coordinator reviewed failures as logic defects; no failing expectations were weakened. Added guard/report and standalone-country-code controls, and retained the earlier regression tests.
+
 ## Docker and initial PostgreSQL storage — 2026-10-30
 
 - Added non-root Python CLI runtime and test images, Compose PostgreSQL 17 service, persistent volumes, readiness checks, and build/runtime CA mounting. See `docs/docker.md`.

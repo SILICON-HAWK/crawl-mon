@@ -60,16 +60,21 @@ def _extract(store: RunStore, run_id: str, india_only: bool = False) -> list[dic
 def extract_run(store: RunStore, run_id: str, india_only: bool = False) -> list[dict]:
     """Re-extract saved evidence without loading a crawler or making requests."""
     with store.operation_lock():
-        record = store.get(run_id)
-        if record.status in {"pending", "running"}:
-            raise RuntimeError("run must finish collection before extraction")
-        items = _extract(store, run_id, india_only=india_only)
-        report = store.read_execution(run_id)
-        if report is not None:
-            report["items_extracted"] = len(items)
-            report["last_extracted_at"] = _now()
-            store.write_execution(run_id, report)
-        return items
+        return _extract_run_locked(store, run_id, india_only=india_only)
+
+
+def _extract_run_locked(store: RunStore, run_id: str, india_only: bool = False) -> list[dict]:
+    """Extract saved evidence while the caller holds the operation lock."""
+    record = store.get(run_id)
+    if record.status in {"pending", "running"}:
+        raise RuntimeError("run must finish collection before extraction")
+    items = _extract(store, run_id, india_only=india_only)
+    report = store.read_execution(run_id)
+    if report is not None:
+        report["items_extracted"] = len(items)
+        report["last_extracted_at"] = _now()
+        store.write_execution(run_id, report)
+    return items
 
 
 def score_run(
@@ -87,7 +92,7 @@ def score_run(
         store.get(run_id)
         results = store.list_results(run_id)
         if not results:
-            results = extract_run(store, run_id)
+            results = _extract_run_locked(store, run_id)
         if not results:
             return []
 
