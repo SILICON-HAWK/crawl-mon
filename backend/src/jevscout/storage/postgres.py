@@ -8,7 +8,7 @@ from pathlib import Path
 from threading import RLock
 from typing import Any, Iterator
 
-from .models import RunRecord, RunSpec
+from jevscout.core.models import RunRecord, RunSpec
 
 
 class PostgresRunStore:

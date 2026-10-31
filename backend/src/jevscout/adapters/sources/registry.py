@@ -7,14 +7,14 @@ import logging
 from typing import Any
 from urllib.parse import urlsplit
 
-from jevscout.feeds.ashby import parse_ashby_feed
-from jevscout.feeds.breezy import parse_breezy_feed
-from jevscout.feeds.greenhouse import parse_greenhouse_feed
-from jevscout.feeds.lever import parse_lever_feed
-from jevscout.feeds.recruitee import parse_recruitee_feed
-from jevscout.feeds.teamtailor import parse_teamtailor_feed
+from jevscout.adapters.sources.ashby import parse_ashby_feed
+from jevscout.adapters.sources.breezy import parse_breezy_feed
+from jevscout.adapters.sources.greenhouse import parse_greenhouse_feed
+from jevscout.adapters.sources.lever import parse_lever_feed
+from jevscout.adapters.sources.recruitee import parse_recruitee_feed
+from jevscout.adapters.sources.teamtailor import parse_teamtailor_feed
 
-logger = logging.getLogger("jevscout.feeds.registry")
+logger = logging.getLogger("jevscout.adapters.sources.registry")
 
 
 def detect_feed_type(payload_json: str, source_url: str | None = None) -> str | None:

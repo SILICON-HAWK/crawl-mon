@@ -25,6 +25,11 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Backend package organization — 2026-10-31
+
+- Grouped Python code into core, application, jobs, adapters, storage, and interface packages; updated imports and the CLI entry point.
+- Existing Python import paths changed; command-line behavior remains the same. Docker and PostgreSQL integration verification is deferred.
+
 ## Repository layout — 2026-10-31
 
 - Moved the Python package and tests into `backend/`, container files into `deploy/`, and reserved `frontend/` for a future UI.

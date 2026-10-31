@@ -6,7 +6,7 @@ import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional, Protocol, Union
 
-from jevscout.scoring.models import (
+from jevscout.modules.jobs.scoring.models import (
     ChoiceAnswer,
     DecisionAnswer,
     NoulAnswer,

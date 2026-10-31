@@ -1,6 +1,6 @@
 # Current continuation
 
-Local `main` includes `origin/codex/integration/docker` through `b837e4a`. The repository layout now uses `backend/`, `deploy/`, and `frontend/`. Finish organizing the internal Python package by responsibility, update imports and documentation, run tests, and commit. Remote `main` has not been updated. The historical sections below include stale paths and status.
+Local `main` includes `origin/codex/integration/docker` through `b837e4a`. The repository layout now uses `backend/`, `deploy/`, and `frontend/`. The backend package is organized by responsibility; see the README for the package map. Python import paths changed. Docker and PostgreSQL verification were deferred at the user’s request. Remote `main` has not been updated. The historical sections below include stale paths and status.
 
 Latest test-layout verification: all 124 Docker tests passed with no skips (63.646s).
 

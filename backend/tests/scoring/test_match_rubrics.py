@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from jevscout.scoring.models import CandidateProfile, JobPosting
-from jevscout.scoring.rubrics import build_job_state, build_matching_questions
+from jevscout.modules.jobs.scoring.models import CandidateProfile, JobPosting
+from jevscout.modules.jobs.scoring.rubrics import build_job_state, build_matching_questions
 
 
 class MatchRubricsTests(unittest.TestCase):

@@ -69,3 +69,7 @@ Use a virtual environment for package installation. Core record/query/parser ope
 Python and Crawlee are selected. Start with local filesystem persistence, then CLI-driven collection, saved evidence, structured extraction, and inspection; add JEV afterward. The target architecture is containerizable, with a focused core library, CLI/MCP/API adapters, bounded workers, persistent runs, and an optional results UI. PostgreSQL is the intended later backend. Target-site feasibility is validated separately.
 
 See [Subsystem test suites](backend/tests/README.md) for core, crawler, database, Docker, and utility checks.
+
+## Backend layout
+
+The Python package lives in `backend/src/jevscout`: `core` defines run models and crawler contracts; `application` coordinates use cases; `modules/jobs` contains job extraction and scoring; `adapters` contains Crawlee and source integrations; `storage` contains persistence implementations; and `interfaces` contains the CLI. Python imports have moved to these paths.

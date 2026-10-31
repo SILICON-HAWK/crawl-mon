@@ -6,12 +6,12 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from jevscout.application import score_run
-from jevscout.models import RunSpec
-from jevscout.scoring.client import LocalHeuristicDecisionClient
-from jevscout.scoring.engine import JobMatchEngine
-from jevscout.scoring.models import CandidateProfile, JobPosting
-from jevscout.storage import FileRunStore
+from jevscout.application.operations import score_run
+from jevscout.core.models import RunSpec
+from jevscout.modules.jobs.scoring.client import LocalHeuristicDecisionClient
+from jevscout.modules.jobs.scoring.engine import JobMatchEngine
+from jevscout.modules.jobs.scoring.models import CandidateProfile, JobPosting
+from jevscout.storage.filesystem import FileRunStore
 from tests.cli.test_cli import invoke
 
 

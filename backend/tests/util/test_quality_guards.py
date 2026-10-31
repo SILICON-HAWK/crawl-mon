@@ -1,6 +1,6 @@
 import unittest
 
-from jevscout.feeds.quality import (
+from jevscout.adapters.sources.quality import (
     clean_department,
     is_technical_posting,
     sanitize_description,

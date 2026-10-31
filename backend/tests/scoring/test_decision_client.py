@@ -5,12 +5,12 @@ import unittest
 from unittest.mock import MagicMock, patch
 import urllib.error
 
-from jevscout.scoring.models import (
+from jevscout.modules.jobs.scoring.models import (
     ChoiceAnswer,
     NoulAnswer,
     ScoreAnswer,
 )
-from jevscout.scoring.client import LocalHeuristicDecisionClient, OpenRouterDecisionClient
+from jevscout.modules.jobs.scoring.client import LocalHeuristicDecisionClient, OpenRouterDecisionClient
 
 
 class DecisionClientTests(unittest.TestCase):

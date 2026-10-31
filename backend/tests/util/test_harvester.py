@@ -1,6 +1,6 @@
 import unittest
 
-from jevscout.feeds.harvester import (
+from jevscout.adapters.sources.harvester import (
     build_provider_endpoint,
     extract_token_from_surt,
     extract_tokens_from_cdx_lines,

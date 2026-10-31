@@ -127,7 +127,7 @@ class CliTests(unittest.TestCase):
             run_id = json.loads(created.stdout)["id"]
 
             # Save sample results
-            from jevscout.storage import FileRunStore
+            from jevscout.storage.filesystem import FileRunStore
             store = FileRunStore(data_dir)
             store.save_results(run_id, [{
                 "title": "Senior Python Developer",

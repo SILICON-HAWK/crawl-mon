@@ -5,12 +5,12 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from jevscout.application import execute_run, score_run
-from jevscout.engine import PageEvidence
-from jevscout.models import RunSpec
-from jevscout.scoring.client import LocalHeuristicDecisionClient
-from jevscout.scoring.models import CandidateProfile
-from jevscout.storage import FileRunStore
+from jevscout.application.operations import execute_run, score_run
+from jevscout.core.engine import PageEvidence
+from jevscout.core.models import RunSpec
+from jevscout.modules.jobs.scoring.client import LocalHeuristicDecisionClient
+from jevscout.modules.jobs.scoring.models import CandidateProfile
+from jevscout.storage.filesystem import FileRunStore
 
 
 class ApplicationTests(unittest.IsolatedAsyncioTestCase):

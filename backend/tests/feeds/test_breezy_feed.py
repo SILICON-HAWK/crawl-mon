@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.breezy import parse_breezy_feed
+from jevscout.adapters.sources.breezy import parse_breezy_feed
 
 
 class BreezyFeedTests(unittest.TestCase):

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.recruitee import parse_recruitee_feed
+from jevscout.adapters.sources.recruitee import parse_recruitee_feed
 
 
 class RecruiteeFeedTests(unittest.TestCase):

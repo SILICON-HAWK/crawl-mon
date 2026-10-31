@@ -1,6 +1,6 @@
 import unittest
 
-from jevscout.feeds.location import is_india_eligible, normalize_india_location
+from jevscout.adapters.sources.location import is_india_eligible, normalize_india_location
 
 
 class IndiaLocationFilterTests(unittest.TestCase):

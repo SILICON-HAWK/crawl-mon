@@ -4,8 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from jevscout.models import RunSpec
-from jevscout.storage import FileRunStore
+from jevscout.core.models import RunSpec
+from jevscout.storage.filesystem import FileRunStore
 
 
 def _try_operation_lock(root: str, results) -> None:

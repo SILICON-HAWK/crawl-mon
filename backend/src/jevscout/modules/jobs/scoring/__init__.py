@@ -1,13 +1,13 @@
 """Agnostic decision model scoring module."""
 from __future__ import annotations
 
-from jevscout.scoring.client import (
+from jevscout.modules.jobs.scoring.client import (
     DecisionClient,
     LocalHeuristicDecisionClient,
     OpenRouterDecisionClient,
 )
-from jevscout.scoring.engine import JobMatchEngine
-from jevscout.scoring.models import (
+from jevscout.modules.jobs.scoring.engine import JobMatchEngine
+from jevscout.modules.jobs.scoring.models import (
     CandidateProfile,
     ChoiceAnswer,
     DecisionAnswer,
@@ -17,7 +17,7 @@ from jevscout.scoring.models import (
     RecommendationTier,
     ScoreAnswer,
 )
-from jevscout.scoring.rubrics import build_job_state, build_matching_questions
+from jevscout.modules.jobs.scoring.rubrics import build_job_state, build_matching_questions
 
 __all__ = [
     "CandidateProfile",

@@ -3,9 +3,9 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock
 
-from jevscout.scoring.client import DecisionClient
-from jevscout.scoring.engine import JobMatchEngine
-from jevscout.scoring.models import (
+from jevscout.modules.jobs.scoring.client import DecisionClient
+from jevscout.modules.jobs.scoring.engine import JobMatchEngine
+from jevscout.modules.jobs.scoring.models import (
     CandidateProfile,
     ChoiceAnswer,
     JobMatchEvaluation,

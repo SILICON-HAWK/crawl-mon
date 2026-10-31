@@ -1,3 +1,3 @@
-from jevscout.cli import main
+from jevscout.interfaces.cli import main
 
 raise SystemExit(main())

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.greenhouse import parse_greenhouse_feed
+from jevscout.adapters.sources.greenhouse import parse_greenhouse_feed
 
 
 class GreenhouseFeedTests(unittest.TestCase):

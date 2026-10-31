@@ -3,8 +3,8 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
-from jevscout.models import RunRecord, RunSpec
-from jevscout.storage import FileRunStore
+from jevscout.core.models import RunRecord, RunSpec
+from jevscout.storage.filesystem import FileRunStore
 
 
 class FileRunStoreTests(unittest.TestCase):

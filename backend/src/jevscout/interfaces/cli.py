@@ -8,11 +8,11 @@ import os
 import sys
 from pathlib import Path
 
-from .models import RunSpec
-from .storage import FileRunStore
+from jevscout.core.models import RunSpec
+from jevscout.storage.filesystem import FileRunStore
 
 
-logger = logging.getLogger("jevscout.cli")
+logger = logging.getLogger("jevscout.interfaces.cli")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -91,7 +91,7 @@ def main(argv: list[str] | None = None) -> int:
             logger.error("db init requires JEVSCOUT_DATABASE_URL")
             return 2
         if database_url:
-            from .postgres import PostgresRunStore
+            from jevscout.storage.postgres import PostgresRunStore
             store = PostgresRunStore(database_url, args.data_dir)
         else:
             store = FileRunStore(args.data_dir)
@@ -121,7 +121,7 @@ def main(argv: list[str] | None = None) -> int:
             logger.debug("runs listed count=%d", len(records))
             _emit([record.to_dict() for record in records])
         elif args.action == "execute":
-            from .application import execute_run
+            from jevscout.application.operations import execute_run
             record = asyncio.run(execute_run(store, args.run_id, approved=args.approve))
             _emit(record.to_dict())
             return 0 if record.status == "completed" else 1
@@ -130,19 +130,19 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "results":
             results = store.list_results(args.run_id)
             if getattr(args, "india_only", False):
-                from .feeds.location import is_india_eligible
+                from jevscout.adapters.sources.location import is_india_eligible
                 results = [r for r in results if r.get("is_india") or is_india_eligible(r.get("location"))]
             _emit(results)
         elif args.action == "extract":
-            from .application import extract_run
+            from jevscout.application.operations import extract_run
             _emit(extract_run(store, args.run_id, india_only=getattr(args, "india_only", False)))
         elif args.action == "report":
             _emit(store.read_execution(args.run_id))
         elif args.action == "artifact":
             _emit({"html": store.read_artifact(args.run_id, args.ref)})
         elif args.action == "score":
-            from .application import score_run
-            from .scoring.models import CandidateProfile
+            from jevscout.application.operations import score_run
+            from jevscout.modules.jobs.scoring.models import CandidateProfile
 
             if args.profile_json:
                 with args.profile_json.open("r", encoding="utf-8") as f:
@@ -168,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
 
             client = None
             if args.offline:
-                from .scoring.client import LocalHeuristicDecisionClient
+                from jevscout.modules.jobs.scoring.client import LocalHeuristicDecisionClient
                 client = LocalHeuristicDecisionClient()
 
             evaluations_res = score_run(

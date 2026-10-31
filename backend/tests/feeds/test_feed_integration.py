@@ -4,10 +4,10 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from jevscout.application import extract_run
-from jevscout.models import RunSpec
-from jevscout.storage import FileRunStore
-from jevscout.cli import main
+from jevscout.application.operations import extract_run
+from jevscout.core.models import RunSpec
+from jevscout.storage.filesystem import FileRunStore
+from jevscout.interfaces.cli import main
 
 
 class FeedIntegrationTests(unittest.TestCase):
@@ -113,9 +113,9 @@ class FeedIntegrationTests(unittest.TestCase):
         extract_run(self.store, run_id, india_only=True)
 
         # Score run with candidate profile
-        from jevscout.application import score_run
-        from jevscout.scoring.client import LocalHeuristicDecisionClient
-        from jevscout.scoring.models import CandidateProfile
+        from jevscout.application.operations import score_run
+        from jevscout.modules.jobs.scoring.client import LocalHeuristicDecisionClient
+        from jevscout.modules.jobs.scoring.models import CandidateProfile
 
         profile = CandidateProfile(
             role_target="Platform / Backend Engineer",

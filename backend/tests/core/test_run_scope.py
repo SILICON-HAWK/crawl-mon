@@ -1,6 +1,6 @@
 import unittest
 
-from jevscout.models import RunSpec
+from jevscout.core.models import RunSpec
 
 
 class RunScopeTests(unittest.TestCase):

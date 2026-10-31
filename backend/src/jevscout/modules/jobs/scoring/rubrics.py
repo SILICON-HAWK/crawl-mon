@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Union
 
-from jevscout.scoring.models import CandidateProfile, JobPosting
+from jevscout.modules.jobs.scoring.models import CandidateProfile, JobPosting
 
 
 def build_job_state(

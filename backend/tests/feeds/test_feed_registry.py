@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.registry import detect_feed_type, detect_and_parse_feed
+from jevscout.adapters.sources.registry import detect_feed_type, detect_and_parse_feed
 
 
 class FeedRegistryTests(unittest.TestCase):

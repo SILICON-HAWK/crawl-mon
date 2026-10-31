@@ -18,7 +18,7 @@ crawl = [
 ]
 
 [project.scripts]
-jevscout = "jevscout.cli:main"
+jevscout = "jevscout.interfaces.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

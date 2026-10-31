@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.lever import parse_lever_feed
+from jevscout.adapters.sources.lever import parse_lever_feed
 
 
 class LeverFeedTests(unittest.TestCase):

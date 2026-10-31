@@ -1,4 +1,4 @@
-"""Breezy HR public board API parser with India location filtering."""
+"""Recruitee public offers API parser with India location filtering."""
 
 from __future__ import annotations
 
@@ -6,59 +6,59 @@ import json
 import logging
 from typing import Any
 
-from jevscout.extraction import _safe_url, _text
-from jevscout.feeds.location import is_india_eligible, normalize_india_location
-from jevscout.feeds.quality import sanitize_description
+from jevscout.modules.jobs.extraction import _safe_url, _text
+from jevscout.adapters.sources.location import is_india_eligible, normalize_india_location
+from jevscout.adapters.sources.quality import sanitize_description
 
-logger = logging.getLogger("jevscout.feeds.breezy")
+logger = logging.getLogger("jevscout.adapters.sources.recruitee")
 
-PARSER_VERSION = "feed-breezy-v1"
+PARSER_VERSION = "feed-recruitee-v1"
 
 
-def parse_breezy_feed(
+def parse_recruitee_feed(
     payload_json: str,
     source_url: str,
     artifact_ref: str,
     india_only: bool = True,
 ) -> list[dict[str, Any]]:
-    """Parse Breezy HR public postings JSON array, optionally filtering strictly for India."""
+    """Parse Recruitee public offers JSON, optionally filtering strictly for India."""
     try:
         data = json.loads(payload_json)
     except (json.JSONDecodeError, RecursionError, TypeError):
         return []
 
-    if not isinstance(data, list):
+    if not isinstance(data, dict):
+        return []
+
+    offers = data.get("offers")
+    if not isinstance(offers, list):
         return []
 
     results: list[dict[str, Any]] = []
 
-    for item in data:
+    for item in offers:
         if not isinstance(item, dict):
             continue
 
-        raw_title = item.get("name")
+        raw_title = item.get("title")
         title = _text(raw_title) if raw_title else None
         if not title:
             continue
 
-        loc_obj = item.get("location")
-        raw_location = ""
-        is_remote = False
-        if isinstance(loc_obj, dict):
-            raw_location = _text(loc_obj.get("name")) or ""
-            is_remote = bool(loc_obj.get("is_remote"))
-            if not raw_location:
-                city = _text(loc_obj.get("city"))
-                state = _text(loc_obj.get("state"))
-                country = None
-                country_dict = loc_obj.get("country")
-                if isinstance(country_dict, dict):
-                    country = _text(country_dict.get("name"))
-                parts = [p for p in (city, state, country) if p]
-                if parts:
-                    raw_location = ", ".join(parts)
+        raw_location = _text(item.get("location")) or ""
+        city = _text(item.get("city"))
+        country_code = _text(item.get("country_code"))
+        is_remote = bool(item.get("remote"))
 
+        if not raw_location:
+            parts = [p for p in (city, country_code) if p]
+            if parts:
+                raw_location = ", ".join(parts)
+
+        # Check location eligibility
         is_india = is_india_eligible(raw_location, workplace_type="remote" if is_remote else None)
+        if not is_india and country_code and country_code.upper() == "IN":
+            is_india = True
         if not is_india and title and is_india_eligible(title):
             is_india = True
 
@@ -70,11 +70,11 @@ def parse_breezy_feed(
         department = _text(item.get("department"))
         description = sanitize_description(item.get("description"))
 
-        app_url = _safe_url(item.get("url"), source_url)
+        app_url = _safe_url(item.get("careers_url"), source_url)
         if not app_url:
             app_url = _safe_url(source_url, source_url)
 
-        date_posted = _text(item.get("published_date"))
+        date_posted = _text(item.get("created_at"))
 
         results.append(
             {
@@ -94,9 +94,9 @@ def parse_breezy_feed(
         )
 
     logger.debug(
-        "parsed breezy feed artifact_ref=%s total=%d filtered_india=%d",
+        "parsed recruitee feed artifact_ref=%s total=%d filtered_india=%d",
         artifact_ref,
-        len(data),
+        len(offers),
         len(results),
     )
     return results

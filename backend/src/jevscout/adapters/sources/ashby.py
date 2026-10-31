@@ -6,11 +6,11 @@ import json
 import logging
 from typing import Any
 
-from jevscout.extraction import _safe_url, _text
-from jevscout.feeds.location import is_india_eligible, normalize_india_location
-from jevscout.feeds.quality import sanitize_description
+from jevscout.modules.jobs.extraction import _safe_url, _text
+from jevscout.adapters.sources.location import is_india_eligible, normalize_india_location
+from jevscout.adapters.sources.quality import sanitize_description
 
-logger = logging.getLogger("jevscout.feeds.ashby")
+logger = logging.getLogger("jevscout.adapters.sources.ashby")
 
 PARSER_VERSION = "feed-ashby-v1"
 

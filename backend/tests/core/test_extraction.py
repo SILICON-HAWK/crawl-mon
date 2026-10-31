@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from jevscout.extraction import parse_jobs
+from jevscout.modules.jobs.extraction import parse_jobs
 
 
 FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "jobs.html"

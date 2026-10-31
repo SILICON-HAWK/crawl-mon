@@ -8,8 +8,8 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
-from jevscout.models import RunSpec
-from jevscout.postgres import PostgresRunStore
+from jevscout.core.models import RunSpec
+from jevscout.storage.postgres import PostgresRunStore
 
 
 DATABASE_URL = os.environ.get("JEVSCOUT_TEST_DATABASE_URL")
@@ -75,9 +75,9 @@ class PostgresRunStoreTests(unittest.TestCase):
         self.assertEqual(reopened.list_results(run.id), [{"title": "Engineer"}])
 
     def test_saved_evidence_extracts_and_scores_through_application(self):
-        from jevscout.application import extract_run, score_run
-        from jevscout.scoring.client import LocalHeuristicDecisionClient
-        from jevscout.scoring.models import CandidateProfile
+        from jevscout.application.operations import extract_run, score_run
+        from jevscout.modules.jobs.scoring.client import LocalHeuristicDecisionClient
+        from jevscout.modules.jobs.scoring.models import CandidateProfile
 
         run = self.store.create(RunSpec(["https://careers.example.test/openings"]))
         html = (PROJECT_ROOT / "tests" / "fixtures" / "jobs.html").read_text(encoding="utf-8")

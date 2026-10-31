@@ -10,9 +10,9 @@ import logging
 from pathlib import Path
 from typing import Protocol
 
-from .engine import CollectionEngine, PageEvidence
-from .extraction import parse_jobs
-from .models import RunRecord
+from jevscout.core.engine import CollectionEngine, PageEvidence
+from jevscout.modules.jobs.extraction import parse_jobs
+from jevscout.core.models import RunRecord
 
 
 logger = logging.getLogger(__name__)
@@ -85,8 +85,8 @@ def score_run(
     model: str | None = None,
 ) -> list[dict]:
     """Score extracted jobs from a run against candidate profile using decision client."""
-    from .scoring.client import OpenRouterDecisionClient
-    from .scoring.engine import JobMatchEngine
+    from jevscout.modules.jobs.scoring.client import OpenRouterDecisionClient
+    from jevscout.modules.jobs.scoring.engine import JobMatchEngine
 
     with store.operation_lock():
         store.get(run_id)
@@ -145,7 +145,7 @@ async def execute_run(
     if not approved:
         raise ApprovalRequired("explicit approval is required before network execution")
     if engine is None:
-        from .crawlee_engine import CrawleeEngine
+        from jevscout.adapters.crawling.crawlee import CrawleeEngine
         engine = CrawleeEngine()
 
     with store.operation_lock():

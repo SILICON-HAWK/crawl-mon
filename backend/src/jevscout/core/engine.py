@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Protocol
 
-from .models import RunSpec
+from jevscout.core.models import RunSpec
 
 
 @dataclass(frozen=True)

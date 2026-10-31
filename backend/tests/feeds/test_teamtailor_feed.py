@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.teamtailor import parse_teamtailor_feed
+from jevscout.adapters.sources.teamtailor import parse_teamtailor_feed
 
 
 class TeamtailorFeedTests(unittest.TestCase):

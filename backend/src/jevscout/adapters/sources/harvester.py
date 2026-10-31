@@ -6,7 +6,7 @@ import logging
 import re
 from typing import Iterable, Optional
 
-logger = logging.getLogger("jevscout.feeds.harvester")
+logger = logging.getLogger("jevscout.adapters.sources.harvester")
 
 # Reserved path segments and subdomains that are not company slugs
 RESERVED_TOKENS = {

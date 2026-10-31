@@ -11,12 +11,12 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from jevscout.engine import PageEvidence
-from jevscout.models import RunSpec
+from jevscout.core.engine import PageEvidence
+from jevscout.core.models import RunSpec
 
 try:
     import httpcore2
-    from jevscout.crawlee_engine import CrawleeEngine, _ScopedAnyIOBackend
+    from jevscout.adapters.crawling.crawlee import CrawleeEngine, _ScopedAnyIOBackend
 except ImportError:
     CrawleeEngine = None
     _ScopedAnyIOBackend = None
@@ -224,7 +224,7 @@ class CrawleeEngineTests(unittest.IsolatedAsyncioTestCase):
             connected_hosts.append(host)
             raise OSError("test blocks external network access")
 
-        with patch("jevscout.crawlee_engine.socket.getaddrinfo", side_effect=[address("93.184.216.34"), address("127.0.0.1")]), patch.object(
+        with patch("jevscout.adapters.crawling.crawlee.socket.getaddrinfo", side_effect=[address("93.184.216.34"), address("127.0.0.1")]), patch.object(
             httpcore2.AnyIOBackend, "connect_tcp", block_external_connect
         ):
             with self.assertRaisesRegex(OSError, "test blocks external network access"):

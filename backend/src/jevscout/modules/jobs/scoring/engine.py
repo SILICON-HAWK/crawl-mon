@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
 
-from jevscout.scoring.client import DecisionClient
-from jevscout.scoring.models import (
+from jevscout.modules.jobs.scoring.client import DecisionClient
+from jevscout.modules.jobs.scoring.models import (
     CandidateProfile,
     ChoiceAnswer,
     JobMatchEvaluation,
@@ -12,7 +12,7 @@ from jevscout.scoring.models import (
     RecommendationTier,
     ScoreAnswer,
 )
-from jevscout.scoring.rubrics import build_job_state, build_matching_questions
+from jevscout.modules.jobs.scoring.rubrics import build_job_state, build_matching_questions
 
 
 class JobMatchEngine:

@@ -6,9 +6,9 @@ import logging
 import re
 from typing import Optional
 
-from jevscout.extraction import _text
+from jevscout.modules.jobs.extraction import _text
 
-logger = logging.getLogger("jevscout.feeds.quality")
+logger = logging.getLogger("jevscout.adapters.sources.quality")
 
 _MAX_DEPARTMENTS_THRESHOLD = 25
 

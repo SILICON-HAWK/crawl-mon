@@ -23,8 +23,8 @@ from crawlee.events import EventManager
 from crawlee.http_clients import HttpxHttpClient
 from crawlee.storage_clients import FileSystemStorageClient
 
-from .engine import CollectionReport, PageEvidence
-from .models import RunSpec
+from jevscout.core.engine import CollectionReport, PageEvidence
+from jevscout.core.models import RunSpec
 
 
 @contextmanager

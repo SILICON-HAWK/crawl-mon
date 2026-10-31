@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from .models import RunRecord, RunSpec
+from jevscout.core.models import RunRecord, RunSpec
 
 
 class FileRunStore:

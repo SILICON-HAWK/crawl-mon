@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from jevscout.feeds.ashby import parse_ashby_feed
+from jevscout.adapters.sources.ashby import parse_ashby_feed
 
 
 class AshbyFeedTests(unittest.TestCase):
