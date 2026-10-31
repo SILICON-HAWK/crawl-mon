@@ -12,3 +12,6 @@ build/
 dist/
 .pytest_cache/
 .ruff_cache/
+
+# Private user-provided documents and profiles
+user-assets/
