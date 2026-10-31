@@ -25,6 +25,10 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Landing page — 2026-10-31
+
+- Restored the welcome introduction on Home only; Jobs, Runs and Profile remain focused views.
+
 ## Job review modes and buckets — 2026-10-31
 
 - Replaced the long jobs list with one-at-a-time Reels and swipe-card views; removed the landing-page hero.

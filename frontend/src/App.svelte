@@ -3,7 +3,7 @@
 
   let runs = $state([]);
   let jobs = $state([]);
-  let activePage = $state('Jobs');
+  let activePage = $state('Home');
   let jobsLoading = $state(true);
   let pipelines = $state([]);
   let selectedRun = $state(null);
@@ -72,11 +72,11 @@
   const jobUrlOf = (job) => job?.url ?? job?.application_url ?? job?.apply_url ?? job?.source_url ?? null;
   const listText = (value) => String(value ?? '').split(/\n|,/).map((part) => part.trim()).filter(Boolean);
   const niceKey = (key) => String(key).replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-  const pageFromPath = (path) => ({ '/': 'Jobs', '/jobs': 'Jobs', '/runs': 'Runs', '/profile': 'Profile' })[path] ?? 'Jobs';
+  const pageFromPath = (path) => ({ '/': 'Home', '/jobs': 'Jobs', '/runs': 'Runs', '/profile': 'Profile' })[path] ?? 'Jobs';
 
   function navigate(page, event) {
     event?.preventDefault();
-    const path = { Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page];
+    const path = { Home: '/', Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page];
     if (location.pathname !== path) history.pushState({}, '', path);
     activePage = page;
   }
@@ -332,8 +332,13 @@
   <main>
     {#if error}<div class="alert" role="alert"><span>!</span>{error}<button onclick={() => error = ''} aria-label="Dismiss">×</button></div>{/if}
     {#if notice}<div class="notice" role="status">✓ {notice}<button onclick={() => notice = ''} aria-label="Dismiss">×</button></div>{/if}
-    <nav class="page-nav" aria-label="Main navigation">{#each ['Jobs', 'Runs', 'Profile'] as page}<a class:active={activePage === page} href={{ Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page]} aria-current={activePage === page ? 'page' : undefined} onclick={(event) => navigate(page, event)}>{page}</a>{/each}</nav>
-    {#if activePage === 'Jobs'}
+    <nav class="page-nav" aria-label="Main navigation">{#each ['Home', 'Jobs', 'Runs', 'Profile'] as page}<a class:active={activePage === page} href={{ Home: '/', Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page]} aria-current={activePage === page ? 'page' : undefined} onclick={(event) => navigate(page, event)}>{page}</a>{/each}</nav>
+    {#if activePage === 'Home'}
+    <section class="intro">
+      <div><p class="eyebrow">YOUR OPPORTUNITIES</p><h1>Good work starts<br /><em>with a clear view.</em></h1><p class="lede">Review the roles collected for your search and see their saved decision scores.</p><a class="primary" href="/jobs" onclick={(event) => navigate('Jobs', event)}>Explore jobs ↗</a></div>
+      <div class="intro-art" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="sun"></span><span class="art-label">YOUR NEXT<br />OPPORTUNITY</span></div>
+    </section>
+    {:else if activePage === 'Jobs'}
     <div class="section-heading jobs-heading"><div><p class="eyebrow">YOUR OPPORTUNITIES</p><h2>Jobs</h2></div><div class="results-tools"><span class="count">{filteredJobs.length} of {jobs.length} jobs</span><div class="view-toggle" aria-label="Jobs view"><button class:active={jobMode === 'reels'} onclick={() => jobMode = 'reels'} aria-pressed={jobMode === 'reels'}>Reels</button><button class:active={jobMode === 'cards'} onclick={() => jobMode = 'cards'} aria-pressed={jobMode === 'cards'}>Cards</button></div><button class="text-button" onclick={loadJobs}>Refresh ↻</button></div></div>
     <div class="job-filters" aria-label="Filter jobs">{#each [['all','All'],['interested','Interested'],['not_interested','Not interested']] as [key,label]}<button class:active={jobBucket === key} aria-pressed={jobBucket === key} onclick={() => { jobBucket = key; activeJobIndex = 0; }}>{label}{#if key === 'interested'} <span>{jobs.filter(j => jobActions[jobUrlOf(j)] === 'interested').length}</span>{:else if key === 'not_interested'} <span>{jobs.filter(j => jobActions[jobUrlOf(j)] === 'not_interested').length}</span>{/if}</button>{/each}</div>
     {#if jobsLoading}<div class="empty"><span class="spinner"></span><p>Loading jobs…</p></div>

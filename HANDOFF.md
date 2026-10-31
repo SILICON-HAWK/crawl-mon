@@ -1,3 +1,7 @@
+# Landing page deployment
+
+Stable port 8080 serves `frontend/dist-stable-home`; Home at `/` contains the welcome introduction and `/jobs`, `/runs` and `/profile` remain separate.
+
 # Current stable job review
 
 Stable app uses `frontend/dist-stable-swipe` on Tailscale port 8080. Jobs offers one-at-a-time Reels and Cards and reversible profile-scoped decisions stored in ignored `user-assets/<username>/job-actions.json`. Development UI remains 5173. Stage releases independently before switching stable; processes are session-bound. Swipe gestures have not been verified on a physical phone.
