@@ -12,6 +12,7 @@ from typing import Any
 from jevscout.application.operations import execute_run
 from jevscout.core.models import RunSpec
 from jevscout.modules.jobs.scoring.models import CandidateProfile
+from jevscout.modules.jobs.filters import is_technical_job
 
 
 MAX_SEEDS = 5
@@ -158,6 +159,8 @@ class PipelineManager:
                     if finished.status != "completed":
                         any_failure = True
                     for job_index, job in enumerate(jobs):
+                        if not is_technical_job(job):
+                            continue
                         score, matched = _rank(job, profile)
                         ranked.append({
                             "run_id": run.id, "job_id": f"{run.id}:{job_index}",

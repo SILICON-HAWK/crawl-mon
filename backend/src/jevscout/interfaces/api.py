@@ -121,13 +121,16 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
         return [record.to_dict() for record in run_store.list_runs()]
 
     @app.get("/api/jobs")
-    def list_jobs() -> list[dict[str, Any]]:
+    def list_jobs(technical_only: bool = True) -> list[dict[str, Any]]:
         """Aggregate saved extracted jobs, newest run first, retaining source indices."""
+        from jevscout.modules.jobs.filters import is_technical_job
         records = sorted(run_store.list_runs(), key=lambda record: record.created_at, reverse=True)
         jobs: list[dict[str, Any]] = []
         by_url: dict[str, dict[str, Any]] = {}
         for record in records:
             for job_index, source_job in enumerate(run_store.list_results(record.id)):
+                if technical_only and not is_technical_job(source_job):
+                    continue
                 provenance = {"run_id": record.id, "job_index": job_index}
                 job = {**source_job, **provenance, "originals": [provenance]}
                 key = _canonical_application_url(source_job.get("application_url"))

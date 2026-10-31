@@ -1,3 +1,7 @@
+# Technical job filter
+
+Jobs API and pipeline ranking now default to conservative technical-title selection; original feed records remain in storage. Decision batch was restarted for the filtered list. Rules may miss or misclassify jobs and need later review.
+
 # Current frontend snapshot
 
 Stable port 8080 serves `frontend/dist-stable-home-fix`.

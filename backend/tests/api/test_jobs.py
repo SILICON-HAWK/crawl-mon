@@ -43,7 +43,7 @@ class JobsApiTests(unittest.TestCase):
              "salary": "₹10–12 LPA", "skills": ["Go"]},
         ])
 
-        response = self.client.get("/api/jobs")
+        response = self.client.get("/api/jobs?technical_only=false")
         self.assertEqual(response.status_code, 200)
         jobs = response.json()
         self.assertEqual(jobs[0]["run_id"], newer.id)
@@ -58,6 +58,12 @@ class JobsApiTests(unittest.TestCase):
         self.assertEqual(jobs[1]["job_index"], 1)
         self.assertIsNone(jobs[1]["application_url"])
         self.assertEqual(jobs[1]["requirements"], ["3 years"])
+
+    def test_default_filters_sales_and_teaching_but_keeps_engineering(self):
+        run = self.store.create(RunSpec(["https://source.test/"]))
+        self.store.save_results(run.id, [{"title": "AI Engineer"}, {"title": "Sales Manager"}, {"title": "Math Teacher"}])
+        self.assertEqual([job["title"] for job in self.client.get("/api/jobs").json()], ["AI Engineer"])
+        self.assertEqual(len(self.client.get("/api/jobs?technical_only=false").json()), 3)
 
 
 if __name__ == "__main__":
