@@ -16,7 +16,8 @@ services:
 
   app:
     build:
-      context: .
+      context: ..
+      dockerfile: deploy/Dockerfile
       secrets:
         - proxy_ca
     environment:
@@ -37,7 +38,8 @@ services:
 
   test:
     build:
-      context: .
+      context: ..
+      dockerfile: deploy/Dockerfile
       target: test
       secrets:
         - proxy_ca

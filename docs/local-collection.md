@@ -8,17 +8,17 @@ Use Python 3.11+ in a virtual environment, then install the project and HTTP ext
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[crawl]'
+.venv/bin/python -m pip install -e './backend[crawl]'
 ```
 
-The dependency set pins Crawlee 1.11.0, HTTPX2 2.16.0, and HTTPCore2 2.16.0. No browser binaries or PostgreSQL service are needed. On distributions that omit venv/pip, enable their Python packaging support first, or use an existing package-managed environment. The record-only CLI also runs with `PYTHONPATH=src python3 -m jevscout` without package installation.
+The dependency set pins Crawlee 1.11.0, HTTPX2 2.16.0, and HTTPCore2 2.16.0. No browser binaries or PostgreSQL service are needed. On distributions that omit venv/pip, enable their Python packaging support first, or use an existing package-managed environment. The record-only CLI also runs with `PYTHONPATH=backend/src python3 -m jevscout` without package installation.
 
 ## Collect the controlled fixture
 
 From the repository root, start the fixture in one terminal:
 
 ```bash
-python3 -m http.server 8765 --bind 127.0.0.1 --directory tests/fixtures
+python3 -m http.server 8765 --bind 127.0.0.1 --directory backend/tests/fixtures
 ```
 
 In a second terminal, create a request:
@@ -85,7 +85,7 @@ The transport backend and cancellation context use version-pinned framework exte
 ## Verification
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+PYTHONPATH=backend/src .venv/bin/python -m unittest discover -s backend/tests -v
 ```
 
 The suite uses local HTTP servers plus external DNS/socket-boundary simulations; no Indeed/Naukri credentials, live job boards, or JEV credits are required. It covers traversal, duplicate links, depth/page limits, redirects, default local denial, robots denial, bounded retries, metadata/result storage, explicit approval, partial results, timeout/cancellation, debug redaction, and offline extraction.

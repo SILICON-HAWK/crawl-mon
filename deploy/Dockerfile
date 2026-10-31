@@ -12,8 +12,8 @@ RUN groupadd --system --gid 10001 jevscout \
     && useradd --system --uid 10001 --gid jevscout --home-dir /home/jevscout jevscout \
     && install -d -o jevscout -g jevscout /data
 
-COPY pyproject.toml README.md ./
-COPY --chown=10001:10001 src ./src
+COPY backend/pyproject.toml ./
+COPY --chown=10001:10001 backend/src ./src
 
 RUN --mount=type=secret,id=proxy_ca,required=false \
     if [ -s /run/secrets/proxy_ca ]; then \
@@ -29,7 +29,7 @@ CMD ["--help"]
 
 FROM runtime AS test
 ENV JEVSCOUT_CONTAINER_TEST=1
-COPY --chown=10001:10001 tests ./tests
+COPY --chown=10001:10001 backend/tests ./tests
 ENTRYPOINT ["python", "-m", "unittest"]
 CMD ["discover", "-s", "tests", "-t", ".", "-v"]
 

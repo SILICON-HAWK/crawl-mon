@@ -25,6 +25,11 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Repository layout — 2026-10-31
+
+- Moved the Python package and tests into `backend/`, container files into `deploy/`, and reserved `frontend/` for a future UI.
+- Updated package setup, container build paths, and main usage instructions. Internal Python module organization remains upcoming.
+
 ## Agnostic decision scoring engine & OpenRouter integration — 2026-10-29
 
 - Added provider-agnostic decision scoring module (`src/jevscout/scoring/`) supporting OpenRouter Decisions API (`POST https://openrouter.ai/api/alpha/decisions`).

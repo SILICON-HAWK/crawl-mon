@@ -1,3 +1,7 @@
+# Current continuation
+
+Local `main` includes `origin/codex/integration/docker` through `b837e4a`. The repository layout now uses `backend/`, `deploy/`, and `frontend/`. Finish organizing the internal Python package by responsibility, update imports and documentation, run tests, and commit. Remote `main` has not been updated. The historical sections below include stale paths and status.
+
 Latest test-layout verification: all 124 Docker tests passed with no skips (63.646s).
 
 Tests are organized by subsystem under `tests/`; see `tests/README.md`. Use `PYTHONPATH=src python3 -m unittest discover -s tests -t . -v`, or select a subsystem folder. The Docker test target runs every dependency-backed suite plus a packaging smoke check. Earlier flat-file test commands below are historical.

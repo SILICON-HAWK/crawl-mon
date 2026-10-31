@@ -19,14 +19,14 @@ controlled crawler fixtures, and mocked external decision-provider responses.
 Full local discovery:
 
 ```sh
-PYTHONPATH=src python3 -m unittest discover -s tests -t . -v
+PYTHONPATH=backend/src python3 -m unittest discover -s backend/tests -t backend -v
 ```
 
 Select a subsystem by changing the start directory:
 
 ```sh
-PYTHONPATH=src python3 -m unittest discover -s tests/core -t . -v
-PYTHONPATH=src python3 -m unittest discover -s tests/crawler -t . -v
+PYTHONPATH=backend/src python3 -m unittest discover -s backend/tests/core -t backend -v
+PYTHONPATH=backend/src python3 -m unittest discover -s backend/tests/crawler -t backend -v
 ```
 
 Crawlee checks require `.[crawl]`; database checks require `.[postgres]` and
@@ -37,10 +37,10 @@ test image. Local success with skips does not verify those integrations.
 For every subsystem, with dependencies installed and a real database:
 
 ```sh
-docker compose build test
-docker compose run --rm test
-docker compose run --rm test discover -s tests/db -t . -v
-docker compose run --rm test discover -s tests/crawler -t . -v
+docker compose -f deploy/compose.yaml build test
+docker compose -f deploy/compose.yaml run --rm test
+docker compose -f deploy/compose.yaml run --rm test discover -s tests/db -t . -v
+docker compose -f deploy/compose.yaml run --rm test discover -s backend/tests/crawler -t backend -v
 ```
 
 Use a disposable Compose project (`-p jevscout-test`) to isolate test records.
