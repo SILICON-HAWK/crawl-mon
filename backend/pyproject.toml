@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
+web = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1"]
 postgres = ["psycopg[binary]==3.2.13"]
 crawl = [
     "crawlee[beautifulsoup,httpx]==1.11.0",

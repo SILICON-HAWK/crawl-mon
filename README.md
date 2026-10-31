@@ -73,3 +73,5 @@ See [Subsystem test suites](backend/tests/README.md) for core, crawler, database
 ## Backend layout
 
 The Python package lives in `backend/src/jevscout`: `core` defines run models and crawler contracts; `application` coordinates use cases; `modules/jobs` contains job extraction and scoring; `adapters` contains Crawlee and source integrations; `storage` contains persistence implementations; and `interfaces` contains the CLI. Python imports have moved to these paths.
+
+For the local dashboard and bounded pipeline, see [Frontend MVP](docs/frontend-mvp.md).

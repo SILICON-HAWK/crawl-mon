@@ -25,6 +25,13 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Local dashboard and bounded pipeline — 2026-10-31
+
+- Added Svelte/Vite dashboard and local FastAPI interface to inspect runs and start and monitor bounded feed collection and offline heuristic ranking.
+- Pipeline accepts up to five explicit seeds, runs one at a time, and preserves source/run provenance. Status and rankings are in memory; saved runs and evidence persist.
+- Added a full data-flow plan and local setup instructions. No résumé is loaded automatically and no remote model is called.
+- Verified API-to-pipeline-to-storage integration with a controlled fixture, a real Ashby feed (13 extracted jobs), and frontend production build.
+
 ## Backend package organization — 2026-10-31
 
 - Grouped Python code into core, application, jobs, adapters, storage, and interface packages; updated imports and the CLI entry point.

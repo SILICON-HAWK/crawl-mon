@@ -1,3 +1,7 @@
+# Dashboard MVP continuation
+
+Local frontend, API, and bounded offline ranking pipeline are described in [frontend MVP](docs/frontend-mvp.md) and [plan](docs/frontend-mvp-plan.md). Stage-by-stage pipeline and decision-quality review remains a separate user-requested task. Pipeline state is in memory; it neither automatically reads the private résumé nor calls a decision model. Use TDD for future behavior changes and handoff for the next continuation. No remote push has been requested for this MVP.
+
 # Current continuation
 
 Local `main` includes `origin/codex/integration/docker` through `b837e4a`. The repository layout now uses `backend/`, `deploy/`, and `frontend/`. The backend package is organized by responsibility; see the README for the package map. Python import paths changed. Docker and PostgreSQL verification were deferred at the user’s request. Remote `main` has not been updated. The historical sections below include stale paths and status.
