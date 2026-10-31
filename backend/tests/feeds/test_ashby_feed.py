@@ -53,6 +53,8 @@ class AshbyFeedTests(unittest.TestCase):
         self.assertEqual(first["artifact_ref"], self.artifact_ref)
         self.assertEqual(first["parser_version"], "feed-ashby-v1")
         self.assertEqual(first["schema_version"], 1)
+        self.assertEqual(first["salary"], "₹35,00,000 - ₹55,00,000")
+        self.assertEqual(jobs[2]["salary"], None)
 
     def test_handles_malformed_json_safely(self):
         jobs = parse_ashby_feed(

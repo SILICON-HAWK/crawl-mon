@@ -15,3 +15,6 @@ dist/
 
 # Private user-provided documents and profiles
 user-assets/
+
+# Stable built frontend snapshot
+frontend/dist-stable/

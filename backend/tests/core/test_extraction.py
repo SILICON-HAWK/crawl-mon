@@ -22,6 +22,7 @@ class ParseJobsTests(unittest.TestCase):
                 "schema_version": 1,
                 "parser_version": "jsonld-jobs-v1",
                 "title": "Platform Engineer",
+                "salary": None,
                 "company": "Example Labs",
                 "location": "Bengaluru, IN",
                 "description": "Build reliable platforms.",
@@ -73,6 +74,16 @@ class ParseJobsTests(unittest.TestCase):
 
         self.assertEqual(len(jobs), 4)
         self.assertTrue(all(job["application_url"] is None for job in jobs))
+
+    def test_preserves_schema_org_salary_range_for_display(self):
+        html = '''<script type="application/ld+json">
+        {"@type":"JobPosting","title":"Paid role","baseSalary":{
+          "@type":"MonetaryAmount","currency":"USD","value":{
+            "@type":"QuantitativeValue","minValue":120000,"maxValue":150000,
+            "unitText":"YEAR"}}}
+        </script>'''
+        jobs = parse_jobs(html, "https://careers.example.test/jobs", "page-salary")
+        self.assertEqual(jobs[0]["salary"], "USD 120000–150000 YEAR")
 
 
 if __name__ == "__main__":

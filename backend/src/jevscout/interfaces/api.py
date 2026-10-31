@@ -11,6 +11,7 @@ import os
 import json
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -64,6 +65,30 @@ class ProfileInput(BaseModel):
     structured_fields: StructuredProfileInput = Field(default_factory=StructuredProfileInput)
 
 
+def _canonical_application_url(value: object) -> str | None:
+    """Normalize only URL components that do not change the application target."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = urlsplit(value)
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
+            return None
+        if parsed.username is not None or parsed.password is not None:
+            return None
+        port = parsed.port
+        host = parsed.hostname.lower()
+        if ":" in host:
+            host = f"[{host}]"
+        if port is not None and not (parsed.scheme.lower() == "https" and port == 443) and not (
+            parsed.scheme.lower() == "http" and port == 80
+        ):
+            host = f"{host}:{port}"
+        path = parsed.path.rstrip("/") or "/"
+        return urlunsplit((parsed.scheme.lower(), host, path, parsed.query, ""))
+    except ValueError:
+        return None
+
+
 def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None) -> FastAPI:
     """Build an API app, allowing tests and embedding hosts to inject stores."""
     app = FastAPI(title="JevScout local API", version="0.1.0")
@@ -84,6 +109,26 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
     @app.get("/api/runs")
     def list_runs() -> list[dict[str, Any]]:
         return [record.to_dict() for record in run_store.list_runs()]
+
+    @app.get("/api/jobs")
+    def list_jobs() -> list[dict[str, Any]]:
+        """Aggregate saved extracted jobs, newest run first, retaining source indices."""
+        records = sorted(run_store.list_runs(), key=lambda record: record.created_at, reverse=True)
+        jobs: list[dict[str, Any]] = []
+        by_url: dict[str, dict[str, Any]] = {}
+        for record in records:
+            for job_index, source_job in enumerate(run_store.list_results(record.id)):
+                provenance = {"run_id": record.id, "job_index": job_index}
+                job = {**source_job, **provenance, "originals": [provenance]}
+                key = _canonical_application_url(source_job.get("application_url"))
+                existing = by_url.get(key) if key else None
+                if existing is not None:
+                    existing["originals"].append(provenance)
+                    continue
+                jobs.append(job)
+                if key:
+                    by_url[key] = job
+        return jobs
 
     @app.get("/api/profile/{username}")
     def get_profile(username: str) -> dict[str, Any]:

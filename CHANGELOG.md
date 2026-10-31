@@ -25,6 +25,12 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Jobs browser and built app — 2026-10-31
+
+- Added separate Jobs, Runs and Profile views; Jobs combines saved results with card/list views, application links, requirements excerpts and explicitly disclosed salaries.
+- Retain salary data from feed and JSON-LD sources where provided. Re-extracted saved feed evidence: 748 unique jobs, 85 with salary.
+- Added built frontend snapshot served with the API separately from the Vite dev server. Both use the same filesystem data; pipeline status is process-local.
+
 ## Local profiles and decision analysis — 2026-10-31
 
 - Added per-user private JSON profiles and file directories, editable profile UI, responsive card/list views, and per-job decision-model analysis with separate dimensions and persisted results.

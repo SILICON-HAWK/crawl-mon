@@ -7,7 +7,7 @@ import json
 import logging
 from typing import Any
 
-from jevscout.modules.jobs.extraction import _safe_url, _text
+from jevscout.modules.jobs.extraction import _safe_url, _salary_display, _text
 from jevscout.adapters.sources.location import is_india_eligible, normalize_india_location
 from jevscout.adapters.sources.quality import sanitize_description
 
@@ -87,6 +87,7 @@ def parse_lever_feed(
                 "schema_version": 1,
                 "parser_version": PARSER_VERSION,
                 "title": title,
+                "salary": _salary_display(item.get("salaryDescription") or item.get("salaryRange")),
                 "company": team,
                 "location": raw_location or None,
                 "location_normalized": normalized_loc,

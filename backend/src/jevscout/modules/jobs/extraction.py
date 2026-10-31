@@ -70,6 +70,41 @@ def _text(value: object) -> str | None:
     return result or None
 
 
+def _salary_display(value: object) -> str | None:
+    """Render an explicitly supplied salary value for display, without inference."""
+    if isinstance(value, str):
+        return " ".join(value.split()) or None
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return str(value)
+    if not isinstance(value, dict):
+        return None
+    # schema.org MonetaryAmount commonly nests a QuantitativeValue in `value`.
+    amount = value.get("value")
+    details = amount if isinstance(amount, dict) else value
+    currency = _text(value.get("currency"))
+    minimum = details.get("minValue", details.get("min"))
+    maximum = details.get("maxValue", details.get("max"))
+    single = details.get("value")
+    def number_text(item: object) -> str | None:
+        if isinstance(item, str) and item.strip():
+            return item.strip()
+        if isinstance(item, (int, float)) and not isinstance(item, bool):
+            return str(item)
+        return None
+    low, high, one = number_text(minimum), number_text(maximum), number_text(single)
+    if low and high:
+        amount_text = f"{low}–{high}"
+    elif one:
+        amount_text = one
+    elif low or high:
+        amount_text = low or high
+    else:
+        return None
+    interval = _text(details.get("unitText") or details.get("interval"))
+    pieces = [p for p in (currency, amount_text, interval) if p]
+    return " ".join(pieces) or None
+
+
 def _is_job_posting(value: object) -> bool:
     types = value.get("@type") if isinstance(value, dict) else None
     if isinstance(types, str):
@@ -161,6 +196,7 @@ def _record(posting: dict[str, object], source_url: str, artifact_ref: str) -> d
         "parser_version": "jsonld-jobs-v1",
         "title": title,
         "company": company,
+        "salary": _salary_display(posting.get("baseSalary")),
         "location": _location(posting.get("jobLocation")),
         "description": _text(posting.get("description")),
         "application_url": application_url,
