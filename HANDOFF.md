@@ -1,3 +1,7 @@
+# Current frontend deployment
+
+Stable Tailscale port 8080 is serving `frontend/dist-stable-next` via `JEVSCOUT_FRONTEND_DIR`; development remains on 5173. User-facing routes are /jobs, /runs and /profile. Build separate snapshots and switch only after checking routes. See docs/frontend-mvp.md for base commands.
+
 # Interface checks
 
 Stable and development services use the same explicit user-assets directory and data/live-trial root. Classification now distinguishes missing profile from missing job; profile and all visible job references were checked. See CHANGELOG for validation.

@@ -25,6 +25,11 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Separate jobs pages — 2026-10-31
+
+- Added distinct Jobs, Runs and Profile URLs with browser navigation; job descriptions stay hidden until expanded. Existing decision results are shown on matching jobs, including duplicate source runs. Improved mobile readability.
+- Staged and checked a separate built frontend snapshot before switching the stable service.
+
 ## Profile and job connection checks — 2026-10-31
 
 - Classification now reports missing profiles and missing saved jobs separately, with a recovery action for each. Confirmed both running interfaces resolve the same saved profile and all 748 visible jobs point to existing results.

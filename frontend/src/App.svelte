@@ -33,6 +33,7 @@
   let preferredLocationsText = $state('');
   let resultsView = $state('list');
   let classifications = $state({});
+  let expandedDescriptions = $state({});
   let classifying = $state({});
   let selectedPipeline = $state(null);
   let refreshing = $state(false);
@@ -65,6 +66,18 @@
   const applyUrlOf = (job) => job?.application_url ?? job?.apply_url ?? job?.url ?? null;
   const listText = (value) => String(value ?? '').split(/\n|,/).map((part) => part.trim()).filter(Boolean);
   const niceKey = (key) => String(key).replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const pageFromPath = (path) => ({ '/': 'Jobs', '/jobs': 'Jobs', '/runs': 'Runs', '/profile': 'Profile' })[path] ?? 'Jobs';
+
+  function navigate(page, event) {
+    event?.preventDefault();
+    const path = { Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page];
+    if (location.pathname !== path) history.pushState({}, '', path);
+    activePage = page;
+  }
+
+  function syncPageFromLocation() {
+    activePage = pageFromPath(location.pathname);
+  }
 
   async function loadProfile() {
     profileError = '';
@@ -162,13 +175,26 @@
     try {
       const data = await request('/api/jobs');
       jobs = asList(data, ['jobs', 'items', 'results']);
-      const runIds = [...new Set(jobs.map((job) => job?.run_id).filter(Boolean))];
+      const runIds = [...new Set(jobs.flatMap((job) => [job?.run_id, ...asList(job?.originals).map((original) => original?.run_id)]).filter(Boolean))];
       const evaluations = await Promise.allSettled(runIds.map((id) => request(`/api/runs/${encodeURIComponent(id)}/evaluations`)));
-      for (const result of evaluations) if (result.status === 'fulfilled') {
-        for (const entry of asList(result.value)) if (entry.username === profileUsername.trim() && Number.isInteger(entry.job_index)) {
-          classifications = { ...classifications, [`${entry.run_id ?? runIds[evaluations.indexOf(result)]}:${entry.job_index}`]: entry };
+      const entriesBySource = new Map();
+      for (let i = 0; i < evaluations.length; i += 1) if (evaluations[i].status === 'fulfilled') {
+        for (const entry of asList(evaluations[i].value)) if (entry.username === profileUsername.trim() && Number.isInteger(entry.job_index)) {
+          entriesBySource.set(`${entry.run_id ?? runIds[i]}:${entry.job_index}`, entry);
         }
       }
+      const saved = { ...classifications };
+      for (const job of jobs) {
+        const key = `${job.run_id}:${Number(job.job_index)}`;
+        const sources = [{ run_id: job.run_id, job_index: job.job_index }, ...asList(job.originals)];
+        const matches = sources.map((source) => entriesBySource.get(`${source.run_id}:${source.job_index}`)).filter(Boolean);
+        if (matches.length) saved[key] = matches.reduce((latest, entry) => {
+          const currentTime = Date.parse(entry.updated_at ?? entry.created_at ?? '') || 0;
+          const latestTime = Date.parse(latest.updated_at ?? latest.created_at ?? '') || 0;
+          return currentTime > latestTime ? entry : latest;
+        });
+      }
+      classifications = saved;
     } catch (e) {
       error = `Could not load jobs: ${e.message}`;
     } finally { jobsLoading = false; }
@@ -231,11 +257,16 @@
   }
 
   onMount(() => {
+    syncPageFromLocation();
+    window.addEventListener('popstate', syncPageFromLocation);
     refresh();
     loadJobs();
     loadProfile();
     const timer = setInterval(() => refresh(true), 8000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('popstate', syncPageFromLocation);
+    };
   });
 </script>
 
@@ -250,17 +281,17 @@
   </header>
 
   <main>
-    <section class="intro">
-      <div><p class="eyebrow">JOB SEARCH OPERATIONS</p><h1>Good work starts<br /><em>with a clear view.</em></h1><p class="lede">Track collection runs, follow pipeline progress, and review the jobs they find.</p></div>
+    {#if activePage === 'Jobs'}<section class="intro">
+      <div><p class="eyebrow">YOUR OPPORTUNITIES</p><h1>Good work starts<br /><em>with a clear view.</em></h1><p class="lede">Review the roles collected for your search and see their saved decision scores.</p></div>
       <div class="intro-art" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="sun"></span><span class="art-label">YOUR NEXT<br />OPPORTUNITY</span></div>
-    </section>
+    </section>{/if}
     {#if error}<div class="alert" role="alert"><span>!</span>{error}<button onclick={() => error = ''} aria-label="Dismiss">×</button></div>{/if}
     {#if notice}<div class="notice" role="status">✓ {notice}<button onclick={() => notice = ''} aria-label="Dismiss">×</button></div>{/if}
-    <nav class="page-nav" aria-label="Main navigation">{#each ['Jobs', 'Runs', 'Profile'] as page}<button class:active={activePage === page} onclick={() => activePage = page}>{page}</button>{/each}</nav>
+    <nav class="page-nav" aria-label="Main navigation">{#each ['Jobs', 'Runs', 'Profile'] as page}<a class:active={activePage === page} href={{ Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page]} aria-current={activePage === page ? 'page' : undefined} onclick={(event) => navigate(page, event)}>{page}</a>{/each}</nav>
     {#if activePage === 'Jobs'}
     <div class="section-heading jobs-heading"><div><p class="eyebrow">ALL OPPORTUNITIES</p><h2>Jobs</h2></div><div class="results-tools"><span class="count">{jobs.length} jobs</span><div class="view-toggle" aria-label="Jobs view"><button class:active={resultsView === 'list'} onclick={() => resultsView = 'list'} aria-pressed={resultsView === 'list'}>List</button><button class:active={resultsView === 'cards'} onclick={() => resultsView = 'cards'} aria-pressed={resultsView === 'cards'}>Cards</button></div><button class="text-button" onclick={loadJobs}>Refresh ↻</button></div></div>
     {#if jobsLoading}<div class="empty"><span class="spinner"></span><p>Loading jobs…</p></div>
-    {:else if jobs.length}<div class="job-list all-jobs" class:card-view={resultsView === 'cards'}>{#each jobs as job, i (`${job.run_id}:${job.job_index}`)}{@const jobIndex = Number(job.job_index ?? i)}{@const jobRunId = job.run_id ?? runId(job)}{@const requirements = requirementsOf(job)}{@const decision = classifications[`${jobRunId}:${jobIndex}`]}<article class="job"><div class="job-top"><span class="job-company">{job.company ?? job.company_name ?? job.employer ?? 'Company'}</span>{#if job.location}<span class="job-location">{job.location}</span>{/if}</div><h4>{job.title ?? job.job_title ?? job.name ?? 'Untitled role'}</h4><p class="job-detail"><strong>Salary</strong> {job.salary ?? 'Not disclosed'}</p>{#if requirements}<p class="job-requirements"><strong>Requirements / skills</strong><br />{Array.isArray(requirements) ? requirements.join(', ') : requirements}</p>{/if}{#if summaryOf(job)}<p class="job-summary">{summaryOf(job)}</p>{/if}<div class="job-links">{#if sourceUrlOf(job)}<a href={sourceUrlOf(job)} target="_blank" rel="noreferrer">Source listing ↗</a>{/if}{#if applyUrlOf(job)}<a href={applyUrlOf(job)} target="_blank" rel="noreferrer">Apply ↗</a>{/if}</div><button class="analyze-button" onclick={() => classifyJob(job, {id: jobRunId}, jobIndex)} disabled={classifying[`${jobRunId}:${jobIndex}`]}>{classifying[`${jobRunId}:${jobIndex}`] ? 'Analyzing…' : 'Analyze with decision model'}</button>{#if decision}<div class="decision-result">{#if decision.error}<span class="decision-error">Analysis failed: {decision.error}</span>{:else}<span class="model-label">Decision model: {decision.model ?? 'unknown'}</span>{#if decision.dimensions}<div class="score-stats">{#each Object.entries(decision.dimensions) as [key, value]}<span>{niceKey(key)}: {typeof value === 'number' ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : String(value)}</span>{/each}</div>{/if}{/if}</div>{/if}</article>{/each}</div>
+    {:else if jobs.length}<div class="job-list all-jobs" class:card-view={resultsView === 'cards'}>{#each jobs as job, i (`${job.run_id}:${job.job_index}`)}{@const jobIndex = Number(job.job_index ?? i)}{@const jobRunId = job.run_id ?? runId(job)}{@const jobKey = `${jobRunId}:${jobIndex}`} {@const requirements = requirementsOf(job)}{@const description = summaryOf(job)}{@const decision = classifications[jobKey]}<article class="job"><div class="job-top"><span class="job-company">{job.company ?? job.company_name ?? job.employer ?? 'Company'}</span>{#if job.location}<span class="job-location">{job.location}</span>{/if}</div><h4>{job.title ?? job.job_title ?? job.name ?? 'Untitled role'}</h4><p class="job-detail"><strong>Salary</strong> {job.salary ?? 'Not disclosed'}</p>{#if requirements}<p class="job-requirements"><strong>Requirements / skills</strong><br />{Array.isArray(requirements) ? requirements.join(', ') : requirements}</p>{/if}{#if description}{#if expandedDescriptions[jobKey]}<p class="job-summary expanded">{description}</p>{/if}<button class="description-toggle" aria-expanded={Boolean(expandedDescriptions[jobKey])} onclick={() => expandedDescriptions = { ...expandedDescriptions, [jobKey]: !expandedDescriptions[jobKey] }}>{expandedDescriptions[jobKey] ? 'Show less' : 'Show more'}</button>{/if}<div class="job-links">{#if sourceUrlOf(job)}<a href={sourceUrlOf(job)} target="_blank" rel="noreferrer">Source listing ↗</a>{/if}{#if applyUrlOf(job)}<a href={applyUrlOf(job)} target="_blank" rel="noreferrer">Apply ↗</a>{/if}</div><button class="analyze-button" onclick={() => classifyJob(job, {id: jobRunId}, jobIndex)} disabled={classifying[jobKey]}>{classifying[jobKey] ? 'Analyzing…' : 'Analyze with decision model'}</button>{#if decision}<div class="decision-result">{#if decision.error}<span class="decision-error">Analysis failed: {decision.error}</span>{:else}<span class="model-label">Decision model: {decision.model ?? 'unknown'}</span>{#if decision.dimensions}<div class="score-stats">{#each Object.entries(decision.dimensions) as [key, value]}<span>{niceKey(key)}: {typeof value === 'number' ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : String(value)}</span>{/each}</div>{/if}{/if}</div>{/if}</article>{/each}</div>
     {:else}<div class="empty"><h3>No jobs found</h3><p>Jobs collected by your runs will appear here.</p></div>{/if}
     {:else if activePage === 'Profile'}
     <div class="section-heading"><div><p class="eyebrow">YOUR SEARCH SETTINGS</p><h2>Candidate profile</h2></div><span class="updated">Saved per username</span></div>

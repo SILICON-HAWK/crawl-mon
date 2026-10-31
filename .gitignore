@@ -17,4 +17,4 @@ dist/
 user-assets/
 
 # Stable built frontend snapshot
-frontend/dist-stable/
+frontend/dist-stable*/
