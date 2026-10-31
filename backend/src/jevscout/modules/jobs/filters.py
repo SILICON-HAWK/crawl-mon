@@ -6,6 +6,17 @@ _TECHNICAL = re.compile(r'\b(software|python|java|golang|node\.?js|backend|back[
 
 _AI_ROLE = re.compile(r'\b(?:ai|artificial intelligence|machine learning|llm)\b.*\b(?:engineer|developer|scientist|researcher|architect)\b|\b(?:engineer|developer|scientist|researcher|architect)\b.*\b(?:ai|artificial intelligence|machine learning|llm)\b', re.I)
 
-def is_technical_job(job: dict) -> bool:
+def classify_job_category(job: dict) -> str:
+    """Classify only from title evidence, leaving unclear jobs undetermined."""
     title = job.get('title')
-    return isinstance(title, str) and bool(_TECHNICAL.search(title) or _AI_ROLE.search(title)) and not _EXCLUDED.search(title)
+    if not isinstance(title, str) or not title.strip():
+        return 'undetermined'
+    if _EXCLUDED.search(title):
+        return 'non_technical'
+    if _TECHNICAL.search(title) or _AI_ROLE.search(title):
+        return 'technical'
+    return 'undetermined'
+
+
+def is_technical_job(job: dict) -> bool:
+    return classify_job_category(job) == 'technical'

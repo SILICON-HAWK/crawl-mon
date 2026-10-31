@@ -52,6 +52,9 @@ def _extract(store: RunStore, run_id: str, india_only: bool = False) -> list[dic
         items.extend(parse_jobs(store.read_artifact(run_id, page["artifact_ref"]),
                                 page["url"], page["artifact_ref"],
                                 india_only=india_only))
+    from jevscout.modules.jobs.filters import classify_job_category
+    for item in items:
+        item["job_category"] = classify_job_category(item)
     store.save_results(run_id, items)
     logger.info("extraction completed run_id=%s items=%d", run_id, len(items))
     return items

@@ -1,3 +1,7 @@
+# Wellfound and semantic search
+
+Wellfound research found no verified supported candidate-facing collection path; see docs/wellfound-research.md. Shared classifier preserves undetermined job types and Jobs API exposes them with technical_only=false. Vector grouping remains a future task; see docs/vector-search-research.md and docs/roadmap.md. Stable API has the updated classifier.
+
 # Decision-model rate limit and caching
 
 Stable port 8080 serves `frontend/dist-stable-insights`. OpenRouter returned HTTP 429 free-models-per-day; the decision batch was stopped and marked rate_limited in ignored local data. Existing decisions are reused by profile and job identity, including duplicate postings; no automatic profile-change invalidation is implemented.

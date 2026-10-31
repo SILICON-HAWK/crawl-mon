@@ -25,6 +25,12 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Wellfound research and undetermined job types — 2026-10-31
+
+- Researched official Wellfound access and documented that no supported candidate-facing job-discovery API was found; no Wellfound crawler was added.
+- Shared title classification now labels jobs technical, non_technical or undetermined. Extraction persists the label, the Jobs API defaults to technical, and `technical_only=false` retains the other categories for later review.
+- Documented options for future local semantic grouping and a staged search plan; no vector infrastructure was installed.
+
 ## Saved decision reuse — 2026-10-31
 
 - Reuse saved per-user job decisions, including duplicate postings in other runs, before calling OpenRouter; serialize identical requests across API processes. Show a clear error for provider rate limits and keep saved decisions available.

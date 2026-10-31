@@ -2,6 +2,12 @@
 
 Historical job-focused roadmap. The current [Execution plan](execution-plan.md) supersedes its ordering and open-decision table: Python/Crawlee and CLI-first collection are settled, JEV follows collection, and Indeed/Naukri feasibility is a separate workstream. Refer to [System architecture](system-architecture.md) for confirmed decisions.
 
+## Current follow-ups
+
+- [ ] Review undetermined job types and build a transparent determination workflow; preserve original evidence.
+- [ ] Investigate Wellfound only when a supported, permitted candidate-facing feed or agreement exists; see [Wellfound research](wellfound-research.md).
+- [ ] Evaluate job similarity and search using labeled examples and resource measurements before adding embeddings; see [vector search research](vector-search-research.md).
+
 ## 1. Confirm inputs and interfaces
 
 - Use the verified [JEV integration research](jev-integration.md) and test an authenticated request.

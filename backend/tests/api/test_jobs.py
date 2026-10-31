@@ -61,9 +61,11 @@ class JobsApiTests(unittest.TestCase):
 
     def test_default_filters_sales_and_teaching_but_keeps_engineering(self):
         run = self.store.create(RunSpec(["https://source.test/"]))
-        self.store.save_results(run.id, [{"title": "AI Engineer"}, {"title": "Sales Manager"}, {"title": "Math Teacher"}])
+        self.store.save_results(run.id, [{"title": "AI Engineer"}, {"title": "Sales Manager"}, {"title": "Math Teacher"}, {"title": "Product Specialist"}])
         self.assertEqual([job["title"] for job in self.client.get("/api/jobs").json()], ["AI Engineer"])
-        self.assertEqual(len(self.client.get("/api/jobs?technical_only=false").json()), 3)
+        all_jobs = self.client.get("/api/jobs?technical_only=false").json()
+        self.assertEqual(len(all_jobs), 4)
+        self.assertEqual([job["job_category"] for job in all_jobs], ["technical", "non_technical", "non_technical", "undetermined"])
 
 
 if __name__ == "__main__":
