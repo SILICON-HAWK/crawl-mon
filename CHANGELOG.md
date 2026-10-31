@@ -25,6 +25,12 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Job review modes and buckets — 2026-10-31
+
+- Replaced the long jobs list with one-at-a-time Reels and swipe-card views; removed the landing-page hero.
+- Added per-profile Interested and Not interested buckets, reversible without deleting jobs. Decisions persist as local JSON with cross-process locking.
+- Tested API behavior and staged the built frontend before switching the stable port.
+
 ## Separate jobs pages — 2026-10-31
 
 - Added distinct Jobs, Runs and Profile URLs with browser navigation; job descriptions stay hidden until expanded. Existing decision results are shown on matching jobs, including duplicate source runs. Improved mobile readability.

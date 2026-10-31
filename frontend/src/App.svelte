@@ -37,6 +37,11 @@
   let classifying = $state({});
   let selectedPipeline = $state(null);
   let refreshing = $state(false);
+  let jobActions = $state({});
+  let jobMode = $state('reels');
+  let jobBucket = $state('all');
+  let activeJobIndex = $state(0);
+  let pointerStart = null;
 
   const asList = (value, keys = []) => {
     if (Array.isArray(value)) return value;
@@ -64,6 +69,7 @@
   const scoringStats = (job) => job?.scoring_stats ?? job?.scoring_breakdown ?? job?.score_components ?? job?.decision_stats ?? null;
   const sourceUrlOf = (job) => job?.source_url ?? job?.provenance?.source_url ?? job?.provenance?.seed_url ?? job?.seed_url ?? null;
   const applyUrlOf = (job) => job?.application_url ?? job?.apply_url ?? job?.url ?? null;
+  const jobUrlOf = (job) => job?.url ?? job?.application_url ?? job?.apply_url ?? job?.source_url ?? null;
   const listText = (value) => String(value ?? '').split(/\n|,/).map((part) => part.trim()).filter(Boolean);
   const niceKey = (key) => String(key).replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
   const pageFromPath = (path) => ({ '/': 'Jobs', '/jobs': 'Jobs', '/runs': 'Runs', '/profile': 'Profile' })[path] ?? 'Jobs';
@@ -81,6 +87,8 @@
 
   async function loadProfile() {
     profileError = '';
+    jobActions = {};
+    activeJobIndex = 0;
     try {
       const data = await request(`/api/profile/${encodeURIComponent(profileUsername.trim())}`);
       profileContext = data?.freeform_context ?? '';
@@ -92,6 +100,7 @@
     } catch (e) {
       profileError = `Could not load profile: ${e.message}`;
     }
+    if (jobs.length) await loadJobActions();
   }
 
   async function saveProfile() {
@@ -175,6 +184,7 @@
     try {
       const data = await request('/api/jobs');
       jobs = asList(data, ['jobs', 'items', 'results']);
+      await loadJobActions();
       const runIds = [...new Set(jobs.flatMap((job) => [job?.run_id, ...asList(job?.originals).map((original) => original?.run_id)]).filter(Boolean))];
       const evaluations = await Promise.allSettled(runIds.map((id) => request(`/api/runs/${encodeURIComponent(id)}/evaluations`)));
       const entriesBySource = new Map();
@@ -198,6 +208,45 @@
     } catch (e) {
       error = `Could not load jobs: ${e.message}`;
     } finally { jobsLoading = false; }
+  }
+
+  async function loadJobActions() {
+    try {
+      const data = await request(`/api/profile/${encodeURIComponent(profileUsername.trim() || 'default')}/job-actions`);
+      const records = Array.isArray(data) ? data : asList(data, ['actions', 'items', 'results']);
+      const mapped = { ...jobActions };
+      for (const [url, status] of Object.entries(data?.actions ?? data ?? {})) mapped[url] = typeof status === 'string' ? status : status?.status;
+      for (const action of records) if (action?.job_url) mapped[action.job_url] = action.status;
+      jobActions = mapped;
+    } catch (e) { error = `Could not load saved job decisions: ${e.message}`; }
+  }
+
+  async function setJobAction(job, status) {
+    const url = jobUrlOf(job);
+    if (!url) return;
+    const previous = jobActions[url];
+    if (status === 'unset') { const next = { ...jobActions }; delete next[url]; jobActions = next; }
+    else jobActions = { ...jobActions, [url]: status };
+    try {
+      await request(`/api/profile/${encodeURIComponent(profileUsername.trim() || 'default')}/job-actions`, { method: 'PUT', body: JSON.stringify({ job_url: url, status }) });
+      if (status === 'unset') { const next = { ...jobActions }; delete next[url]; jobActions = next; }
+      if (jobBucket === 'all' && status !== 'unset' && activeJobIndex < filteredJobs.length - 1) activeJobIndex += 1;
+      else activeJobIndex = Math.min(activeJobIndex, Math.max(0, filteredJobs.length - 1));
+    } catch (e) {
+      jobActions = { ...jobActions, [url]: previous };
+      error = `Could not save job decision: ${e.message}`;
+    }
+  }
+
+  let filteredJobs = $derived(jobs.filter((job) => jobBucket === 'all' || jobActions[jobUrlOf(job)] === (jobBucket === 'interested' ? 'interested' : 'not_interested')));
+  function swipeStart(event) { if (event.target.closest('button, a, details')) { pointerStart = null; return; } pointerStart = { x: event.clientX, y: event.clientY }; }
+  function swipeEnd(event, job) {
+    if (!pointerStart) return;
+    const dx = event.clientX - pointerStart.x;
+    const dy = event.clientY - pointerStart.y;
+    pointerStart = null;
+    if (jobMode === 'reels' && Math.abs(dy) > 65 && Math.abs(dy) > Math.abs(dx)) activeJobIndex = Math.max(0, Math.min(filteredJobs.length - 1, activeJobIndex + (dy < 0 ? 1 : -1)));
+    else if (jobMode === 'cards' && Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) && jobUrlOf(job)) setJobAction(job, dx > 0 ? 'interested' : 'not_interested');
   }
 
   async function showRun(run) {
@@ -281,18 +330,15 @@
   </header>
 
   <main>
-    {#if activePage === 'Jobs'}<section class="intro">
-      <div><p class="eyebrow">YOUR OPPORTUNITIES</p><h1>Good work starts<br /><em>with a clear view.</em></h1><p class="lede">Review the roles collected for your search and see their saved decision scores.</p></div>
-      <div class="intro-art" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="sun"></span><span class="art-label">YOUR NEXT<br />OPPORTUNITY</span></div>
-    </section>{/if}
     {#if error}<div class="alert" role="alert"><span>!</span>{error}<button onclick={() => error = ''} aria-label="Dismiss">×</button></div>{/if}
     {#if notice}<div class="notice" role="status">✓ {notice}<button onclick={() => notice = ''} aria-label="Dismiss">×</button></div>{/if}
     <nav class="page-nav" aria-label="Main navigation">{#each ['Jobs', 'Runs', 'Profile'] as page}<a class:active={activePage === page} href={{ Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page]} aria-current={activePage === page ? 'page' : undefined} onclick={(event) => navigate(page, event)}>{page}</a>{/each}</nav>
     {#if activePage === 'Jobs'}
-    <div class="section-heading jobs-heading"><div><p class="eyebrow">ALL OPPORTUNITIES</p><h2>Jobs</h2></div><div class="results-tools"><span class="count">{jobs.length} jobs</span><div class="view-toggle" aria-label="Jobs view"><button class:active={resultsView === 'list'} onclick={() => resultsView = 'list'} aria-pressed={resultsView === 'list'}>List</button><button class:active={resultsView === 'cards'} onclick={() => resultsView = 'cards'} aria-pressed={resultsView === 'cards'}>Cards</button></div><button class="text-button" onclick={loadJobs}>Refresh ↻</button></div></div>
+    <div class="section-heading jobs-heading"><div><p class="eyebrow">YOUR OPPORTUNITIES</p><h2>Jobs</h2></div><div class="results-tools"><span class="count">{filteredJobs.length} of {jobs.length} jobs</span><div class="view-toggle" aria-label="Jobs view"><button class:active={jobMode === 'reels'} onclick={() => jobMode = 'reels'} aria-pressed={jobMode === 'reels'}>Reels</button><button class:active={jobMode === 'cards'} onclick={() => jobMode = 'cards'} aria-pressed={jobMode === 'cards'}>Cards</button></div><button class="text-button" onclick={loadJobs}>Refresh ↻</button></div></div>
+    <div class="job-filters" aria-label="Filter jobs">{#each [['all','All'],['interested','Interested'],['not_interested','Not interested']] as [key,label]}<button class:active={jobBucket === key} aria-pressed={jobBucket === key} onclick={() => { jobBucket = key; activeJobIndex = 0; }}>{label}{#if key === 'interested'} <span>{jobs.filter(j => jobActions[jobUrlOf(j)] === 'interested').length}</span>{:else if key === 'not_interested'} <span>{jobs.filter(j => jobActions[jobUrlOf(j)] === 'not_interested').length}</span>{/if}</button>{/each}</div>
     {#if jobsLoading}<div class="empty"><span class="spinner"></span><p>Loading jobs…</p></div>
-    {:else if jobs.length}<div class="job-list all-jobs" class:card-view={resultsView === 'cards'}>{#each jobs as job, i (`${job.run_id}:${job.job_index}`)}{@const jobIndex = Number(job.job_index ?? i)}{@const jobRunId = job.run_id ?? runId(job)}{@const jobKey = `${jobRunId}:${jobIndex}`} {@const requirements = requirementsOf(job)}{@const description = summaryOf(job)}{@const decision = classifications[jobKey]}<article class="job"><div class="job-top"><span class="job-company">{job.company ?? job.company_name ?? job.employer ?? 'Company'}</span>{#if job.location}<span class="job-location">{job.location}</span>{/if}</div><h4>{job.title ?? job.job_title ?? job.name ?? 'Untitled role'}</h4><p class="job-detail"><strong>Salary</strong> {job.salary ?? 'Not disclosed'}</p>{#if requirements}<p class="job-requirements"><strong>Requirements / skills</strong><br />{Array.isArray(requirements) ? requirements.join(', ') : requirements}</p>{/if}{#if description}{#if expandedDescriptions[jobKey]}<p class="job-summary expanded">{description}</p>{/if}<button class="description-toggle" aria-expanded={Boolean(expandedDescriptions[jobKey])} onclick={() => expandedDescriptions = { ...expandedDescriptions, [jobKey]: !expandedDescriptions[jobKey] }}>{expandedDescriptions[jobKey] ? 'Show less' : 'Show more'}</button>{/if}<div class="job-links">{#if sourceUrlOf(job)}<a href={sourceUrlOf(job)} target="_blank" rel="noreferrer">Source listing ↗</a>{/if}{#if applyUrlOf(job)}<a href={applyUrlOf(job)} target="_blank" rel="noreferrer">Apply ↗</a>{/if}</div><button class="analyze-button" onclick={() => classifyJob(job, {id: jobRunId}, jobIndex)} disabled={classifying[jobKey]}>{classifying[jobKey] ? 'Analyzing…' : 'Analyze with decision model'}</button>{#if decision}<div class="decision-result">{#if decision.error}<span class="decision-error">Analysis failed: {decision.error}</span>{:else}<span class="model-label">Decision model: {decision.model ?? 'unknown'}</span>{#if decision.dimensions}<div class="score-stats">{#each Object.entries(decision.dimensions) as [key, value]}<span>{niceKey(key)}: {typeof value === 'number' ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : String(value)}</span>{/each}</div>{/if}{/if}</div>{/if}</article>{/each}</div>
-    {:else}<div class="empty"><h3>No jobs found</h3><p>Jobs collected by your runs will appear here.</p></div>{/if}
+    {:else if filteredJobs.length}{@const job = filteredJobs[Math.min(activeJobIndex, filteredJobs.length - 1)]}{@const url = jobUrlOf(job)}<section class="reel-stage" aria-label="Job review"><div class="reel-progress" aria-label={`Job ${activeJobIndex + 1} of ${filteredJobs.length}`}><span class:done={activeJobIndex > 0} class:current={true}></span></div><article class="reel-job" class:card-mode={jobMode === 'cards'} onpointerdown={swipeStart} onpointerup={(event) => swipeEnd(event, job)}><div class="job-top"><span class="job-company">{job.company ?? job.company_name ?? job.employer ?? 'Company'}</span>{#if job.location}<span class="job-location">{job.location}</span>{/if}</div><h3>{job.title ?? job.job_title ?? job.name ?? 'Untitled role'}</h3><p class="job-detail"><strong>Salary</strong> {job.salary ?? 'Not disclosed'}</p>{#if requirementsOf(job)}<p class="job-detail"><strong>Requirements / skills</strong> {Array.isArray(requirementsOf(job)) ? requirementsOf(job).join(', ') : requirementsOf(job)}</p>{:else if matchedSkills(job).length}<p class="job-detail"><strong>Skills</strong> {Array.isArray(matchedSkills(job)) ? matchedSkills(job).join(', ') : matchedSkills(job)}</p>{/if}<div class="job-links">{#if sourceUrlOf(job)}<a href={sourceUrlOf(job)} target="_blank" rel="noreferrer">Source listing ↗</a>{/if}{#if applyUrlOf(job)}<a href={applyUrlOf(job)} target="_blank" rel="noreferrer">Apply ↗</a>{/if}</div><button class="analyze-button" onclick={() => classifyJob(job, {id: job.run_id ?? runId(job)}, Number(job.job_index ?? 0))} disabled={classifying[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`]}>Analyze with decision model</button>{#if classifications[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`]}<div class="decision-result">{#if classifications[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`]?.error}<span class="decision-error">Analysis failed: {classifications[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`].error}</span>{:else}<span class="model-label">Decision model: {classifications[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`]?.model ?? 'unknown'}</span>{#if classifications[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`]?.dimensions}<div class="score-stats">{#each Object.entries(classifications[`${job.run_id ?? runId(job)}:${Number(job.job_index ?? 0)}`].dimensions) as [key, value]}<span>{niceKey(key)}: {typeof value === 'number' ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : String(value)}</span>{/each}</div>{/if}{/if}</div>{/if}{#if summaryOf(job)}<details class="job-description"><summary>Show description</summary><p>{summaryOf(job)}</p></details>{/if}<div class="reel-actions"><button class="action-no" onclick={() => setJobAction(job, 'not_interested')} disabled={!url} aria-label="Not interested">× <span>Not interested</span></button><button class="action-yes" onclick={() => setJobAction(job, 'interested')} disabled={!url} aria-label="Interested">♥ <span>Interested</span></button></div>{#if url && jobActions[url]}<button class="reset-decision" onclick={() => setJobAction(job, 'unset')}>Reset decision ({jobActions[url] === 'interested' ? 'Interested' : 'Not interested'})</button>{/if}{#if !url}<p class="no-job-url">Decision buttons unavailable: this job has no URL.</p>{/if}</article><div class="reel-nav"><button class="text-button" onclick={() => activeJobIndex = Math.max(0, activeJobIndex - 1)} disabled={activeJobIndex === 0}>← Previous</button><span>{activeJobIndex + 1} / {filteredJobs.length}{jobMode === 'reels' ? ' · swipe vertically' : ' · swipe to decide'}</span><button class="text-button" onclick={() => activeJobIndex = Math.min(filteredJobs.length - 1, activeJobIndex + 1)} disabled={activeJobIndex >= filteredJobs.length - 1}>Next →</button></div></section>
+    {:else}<div class="empty"><h3>{jobs.length ? 'No jobs in this bucket' : 'No jobs found'}</h3><p>{jobs.length ? 'Try another decision filter or mark a job in a different bucket.' : 'Jobs collected by your runs will appear here.'}</p></div>{/if}
     {:else if activePage === 'Profile'}
     <div class="section-heading"><div><p class="eyebrow">YOUR SEARCH SETTINGS</p><h2>Candidate profile</h2></div><span class="updated">Saved per username</span></div>
     {#if profileError}<div class="alert" role="alert"><span>!</span>{profileError}<button onclick={() => profileError = ''} aria-label="Dismiss">×</button></div>{/if}

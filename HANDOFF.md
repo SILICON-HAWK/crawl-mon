@@ -1,3 +1,7 @@
+# Current stable job review
+
+Stable app uses `frontend/dist-stable-swipe` on Tailscale port 8080. Jobs offers one-at-a-time Reels and Cards and reversible profile-scoped decisions stored in ignored `user-assets/<username>/job-actions.json`. Development UI remains 5173. Stage releases independently before switching stable; processes are session-bound. Swipe gestures have not been verified on a physical phone.
+
 # Current frontend deployment
 
 Stable Tailscale port 8080 is serving `frontend/dist-stable-next` via `JEVSCOUT_FRONTEND_DIR`; development remains on 5173. User-facing routes are /jobs, /runs and /profile. Build separate snapshots and switch only after checking routes. See docs/frontend-mvp.md for base commands.

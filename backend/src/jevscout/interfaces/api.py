@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import FastAPI, HTTPException
@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from jevscout.storage.filesystem import FileRunStore
 from jevscout.application.profile import ProfileStore
+from jevscout.application.job_actions import JobActionsStore
 
 
 class CandidateProfileInput(BaseModel):
@@ -65,6 +66,13 @@ class ProfileInput(BaseModel):
     structured_fields: StructuredProfileInput = Field(default_factory=StructuredProfileInput)
 
 
+class JobActionInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    job_url: str = Field(min_length=1, max_length=8192)
+    status: Literal["interested", "not_interested", "unset"]
+
+
 def _canonical_application_url(value: object) -> str | None:
     """Normalize only URL components that do not change the application target."""
     if not isinstance(value, str) or not value:
@@ -99,6 +107,8 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
     profile_root = Path(os.environ.get("JEVSCOUT_USER_ASSETS_DIR", str((run_store.root / "user-assets") if store is not None else Path("user-assets"))))
     profile_store = ProfileStore(profile_root)
     app.state.profile_store = profile_store
+    job_actions_store = JobActionsStore(profile_root)
+    app.state.job_actions_store = job_actions_store
 
     if pipeline_manager is None:
         from jevscout.application.pipeline import PipelineManager
@@ -136,6 +146,8 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
             return profile_store.get(username)
         except ValueError:
             raise HTTPException(status_code=422, detail="Invalid profile") from None
+        except (TypeError, OSError):
+            raise HTTPException(status_code=422, detail="Invalid profile") from None
         except (OSError, json.JSONDecodeError):
             raise HTTPException(status_code=500, detail="Could not read profile") from None
 
@@ -149,8 +161,24 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
             )
         except ValueError:
             raise HTTPException(status_code=422, detail="Invalid profile") from None
-        except (TypeError, OSError):
-            raise HTTPException(status_code=422, detail="Invalid profile") from None
+
+    @app.get("/api/profile/{username}/job-actions")
+    def get_job_actions(username: str) -> dict[str, str]:
+        try:
+            return job_actions_store.get(username)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid job actions request") from None
+        except (OSError, json.JSONDecodeError):
+            raise HTTPException(status_code=500, detail="Could not read job actions") from None
+
+    @app.put("/api/profile/{username}/job-actions")
+    def put_job_action(username: str, request: JobActionInput) -> dict[str, str]:
+        try:
+            return job_actions_store.set(username, request.job_url, request.status)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid job actions request") from None
+        except (OSError, TypeError):
+            raise HTTPException(status_code=500, detail="Could not save job action") from None
 
     @app.get("/api/runs/{run_id}/results")
     def get_results(run_id: str) -> list[dict[str, Any]]:
