@@ -25,3 +25,6 @@
 .reset-decision{align-self:center;margin-top:12px;border:0;background:transparent;color:#7a8075;text-decoration:underline;text-underline-offset:3px;font:10px 'DM Mono',monospace;cursor:pointer}
 
 .job-description { touch-action: pan-y; }
+
+/* Keep the landing action in its own row on every screen size. */
+.intro .intro-cta { display: inline-flex; align-items: center; margin: 24px 0 0; text-decoration: none; line-height: 1.4; }

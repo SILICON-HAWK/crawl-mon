@@ -335,7 +335,7 @@
     <nav class="page-nav" aria-label="Main navigation">{#each ['Home', 'Jobs', 'Runs', 'Profile'] as page}<a class:active={activePage === page} href={{ Home: '/', Jobs: '/jobs', Runs: '/runs', Profile: '/profile' }[page]} aria-current={activePage === page ? 'page' : undefined} onclick={(event) => navigate(page, event)}>{page}</a>{/each}</nav>
     {#if activePage === 'Home'}
     <section class="intro">
-      <div><p class="eyebrow">YOUR OPPORTUNITIES</p><h1>Good work starts<br /><em>with a clear view.</em></h1><p class="lede">Review the roles collected for your search and see their saved decision scores.</p><a class="primary" href="/jobs" onclick={(event) => navigate('Jobs', event)}>Explore jobs ↗</a></div>
+      <div><p class="eyebrow">YOUR OPPORTUNITIES</p><h1>Good work starts<br /><em>with a clear view.</em></h1><p class="lede">Review the roles collected for your search and see their saved decision scores.</p><a class="primary intro-cta" href="/jobs" onclick={(event) => navigate('Jobs', event)}>Explore jobs ↗</a></div>
       <div class="intro-art" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="sun"></span><span class="art-label">YOUR NEXT<br />OPPORTUNITY</span></div>
     </section>
     {:else if activePage === 'Jobs'}

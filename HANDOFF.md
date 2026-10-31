@@ -1,3 +1,7 @@
+# Current frontend snapshot
+
+Stable port 8080 serves `frontend/dist-stable-home-fix`.
+
 # Landing page deployment
 
 Stable port 8080 serves `frontend/dist-stable-home`; Home at `/` contains the welcome introduction and `/jobs`, `/runs` and `/profile` remain separate.
