@@ -25,6 +25,11 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Saved decision reuse — 2026-10-31
+
+- Reuse saved per-user job decisions, including duplicate postings in other runs, before calling OpenRouter; serialize identical requests across API processes. Show a clear error for provider rate limits and keep saved decisions available.
+- Added the default-on AI insights display toggle. The free-model batch stopped after the provider reported its daily limit. Saved decisions do not automatically refresh when a profile changes.
+
 ## Technical job selection — 2026-10-31
 
 - Default Jobs view and new pipeline ranking select technical titles while excluding sales, teaching and recruiting; raw collected feed records remain available for review. The conservative title filter can miss relevant unconventional titles.

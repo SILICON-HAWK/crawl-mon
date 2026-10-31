@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import os
 import json
+import fcntl
+import hashlib
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlsplit, urlunsplit
@@ -95,6 +98,20 @@ def _canonical_application_url(value: object) -> str | None:
         return urlunsplit((parsed.scheme.lower(), host, path, parsed.query, ""))
     except ValueError:
         return None
+
+
+@contextmanager
+def _decision_lock(root: Path, username: str, run_id: str, job_index: int):
+    """Serialize requests for the same saved decision across local API processes."""
+    directory = Path(root) / ".decision-locks"
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    name = hashlib.sha256(f"{username}:{run_id}:{job_index}".encode()).hexdigest()
+    with (directory / name).open("a+b") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
 def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None) -> FastAPI:
@@ -208,27 +225,57 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
             job = jobs[request.job_index]
         except (IndexError, ValueError, FileNotFoundError):
             raise HTTPException(status_code=404, detail="Job not found; refresh the Jobs page") from None
-        key = os.environ.get("OPENROUTER_API_KEY", "")
-        if not key:
-            env_file = Path(".env")
-            if env_file.is_file():
-                for line in env_file.read_text(encoding="utf-8").splitlines():
-                    if line.strip().startswith("OPENROUTER_API_KEY="):
-                        key = line.split("=", 1)[1].strip().strip("\"'")
-                        break
-        if not key:
-            raise HTTPException(status_code=400, detail="OpenRouter key is not configured")
-        try:
-            result = classify_job(job, profile, OpenRouterDecisionClient(api_key=key, model="respan/span-01-lite:free"))
-            result.update(run_id=request.run_id, job_index=request.job_index)
-            with run_store.operation_lock():
+        with _decision_lock(run_store.root, request.username, request.run_id, request.job_index):
+            try:
                 previous = run_store.list_evaluations(request.run_id)
-                previous = [item for item in previous if not (item.get("job_index") == request.job_index and item.get("username") == request.username)]
-                previous.append({**result, "username": request.username})
-                run_store.save_evaluations(request.run_id, previous)
-            return result
-        except Exception:
-            raise HTTPException(status_code=502, detail="Decision model request or result storage failed") from None
+            except (OSError, ValueError):
+                raise HTTPException(status_code=503, detail="Could not read saved decisions") from None
+            for item in reversed(previous):
+                if (item.get("job_index") == request.job_index and item.get("username") == request.username
+                        and isinstance(item.get("dimensions"), dict) and item["dimensions"]):
+                    return {**item, "cached": True}
+            job_url = _canonical_application_url(job.get("application_url"))
+            if job_url:
+                for other in run_store.list_runs():
+                    if other.id == request.run_id:
+                        continue
+                    try:
+                        other_jobs = run_store.list_results(other.id)
+                        other_evaluations = run_store.list_evaluations(other.id)
+                    except (OSError, ValueError):
+                        continue
+                    matches = {index for index, candidate in enumerate(other_jobs)
+                               if _canonical_application_url(candidate.get("application_url")) == job_url}
+                    for item in reversed(other_evaluations):
+                        if (item.get("job_index") in matches and item.get("username") == request.username
+                                and isinstance(item.get("dimensions"), dict) and item["dimensions"]):
+                            return {**item, "cached": True, "source_run_id": other.id}
+            key = os.environ.get("OPENROUTER_API_KEY", "")
+            if not key:
+                env_file = Path(".env")
+                if env_file.is_file():
+                    for line in env_file.read_text(encoding="utf-8").splitlines():
+                        if line.strip().startswith("OPENROUTER_API_KEY="):
+                            key = line.split("=", 1)[1].strip().strip("\"'")
+                            break
+            if not key:
+                raise HTTPException(status_code=400, detail="OpenRouter key is not configured")
+            try:
+                result = classify_job(job, profile, OpenRouterDecisionClient(api_key=key, model="respan/span-01-lite:free"))
+            except Exception as exc:
+                if "HTTP 429" in str(exc):
+                    raise HTTPException(status_code=429, detail="OpenRouter rate limit reached; try later. Saved decisions are still available.") from None
+                raise HTTPException(status_code=502, detail="Decision model request failed; try again later") from None
+            result.update(run_id=request.run_id, job_index=request.job_index)
+            try:
+                with run_store.operation_lock():
+                    previous = run_store.list_evaluations(request.run_id)
+                    previous = [item for item in previous if not (item.get("job_index") == request.job_index and item.get("username") == request.username)]
+                    previous.append({**result, "username": request.username})
+                    run_store.save_evaluations(request.run_id, previous)
+            except Exception:
+                raise HTTPException(status_code=503, detail="Analysis completed but could not be saved; storage may be busy") from None
+            return {**result, "cached": False}
 
     @app.get("/api/runs/{run_id}/evaluations")
     def list_evaluations(run_id: str) -> list[dict[str, Any]]:

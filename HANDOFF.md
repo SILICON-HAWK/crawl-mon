@@ -1,3 +1,7 @@
+# Decision-model rate limit and caching
+
+Stable port 8080 serves `frontend/dist-stable-insights`. OpenRouter returned HTTP 429 free-models-per-day; the decision batch was stopped and marked rate_limited in ignored local data. Existing decisions are reused by profile and job identity, including duplicate postings; no automatic profile-change invalidation is implemented.
+
 # Technical job filter
 
 Jobs API and pipeline ranking now default to conservative technical-title selection; original feed records remain in storage. Decision batch was restarted for the filtered list. Rules may miss or misclassify jobs and need later review.

@@ -28,3 +28,4 @@
 
 /* Keep the landing action in its own row on every screen size. */
 .intro .intro-cta { display: inline-flex; align-items: center; margin: 24px 0 0; text-decoration: none; line-height: 1.4; }
+.insights-toggle{border:1px solid #d9dfcf;background:#f8f9f4;border-radius:3px;padding:5px 8px;color:#566b49;font:9px 'DM Mono',monospace;cursor:pointer;white-space:nowrap}.insights-toggle[aria-pressed="true"]{background:#eaf0dc}
