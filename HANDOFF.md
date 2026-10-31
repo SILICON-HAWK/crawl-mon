@@ -1,3 +1,7 @@
+# Interface checks
+
+Stable and development services use the same explicit user-assets directory and data/live-trial root. Classification now distinguishes missing profile from missing job; profile and all visible job references were checked. See CHANGELOG for validation.
+
 # Jobs and stable app
 
 Built mobile app runs on Tailscale port 8080 and development Vite on 5173; see [frontend MVP](docs/frontend-mvp.md) for build/start steps. Processes are session-bound, not persistent services. The stable API and dev API have separate in-memory pipeline states and share local files. Extracted salary is source-supplied only; 85 saved jobs disclose it. `user-assets` stays private. The app has no login and Tailscale access controls determine reachability.

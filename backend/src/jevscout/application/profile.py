@@ -59,6 +59,11 @@ class ProfileStore:
             if temporary_name is not None and os.path.exists(temporary_name):
                 os.unlink(temporary_name)
 
+    def exists(self, username: str) -> bool:
+        user_dir = self._user_dir(username)
+        path = user_dir / "profile.json"
+        return path.is_file() and not path.is_symlink()
+
     def get(self, username: str) -> dict[str, Any]:
         user_dir = self._user_dir(username)
         path = user_dir / "profile.json"

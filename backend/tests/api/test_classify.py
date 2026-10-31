@@ -27,3 +27,16 @@ class TestClassification(unittest.TestCase):
                 self.assertEqual(response.status_code,200,response.text)
                 self.assertEqual(response.json()['dimensions']['career_direction'],0.7)
                 self.assertEqual(client.get('/api/runs/'+run.id+'/evaluations').json()[0]['job_index'],0)
+
+    def test_missing_profile_and_job_are_distinguished(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store=FileRunStore(Path(directory)); run=store.create(RunSpec(['https://example.com']))
+            store.save_results(run.id,[{'title':'Engineer'}])
+            app=create_app(store=store,pipeline_manager=object()); client=TestClient(app)
+            missing=client.post('/api/classify',json={'username':'nobody','run_id':run.id,'job_index':0})
+            self.assertEqual(missing.status_code,404)
+            self.assertEqual(missing.json()['detail'],'Profile not found; save it on the Profile page')
+            app.state.profile_store.put('alice',freeform_context='Python',structured_fields={})
+            missing_job=client.post('/api/classify',json={'username':'alice','run_id':run.id,'job_index':5})
+            self.assertEqual(missing_job.status_code,404)
+            self.assertEqual(missing_job.json()['detail'],'Job not found; refresh the Jobs page')

@@ -165,13 +165,18 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
         from jevscout.application.classification import classify_job
         from jevscout.modules.jobs.scoring.client import OpenRouterDecisionClient
         try:
+            if not profile_store.exists(request.username):
+                raise HTTPException(status_code=404, detail="Profile not found; save it on the Profile page")
             profile = profile_store.get(request.username)
             if not profile.get("freeform_context", "").strip():
                 raise HTTPException(status_code=400, detail="Save candidate context before classification")
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid profile name") from None
+        try:
             jobs = run_store.list_results(request.run_id)
             job = jobs[request.job_index]
         except (IndexError, ValueError, FileNotFoundError):
-            raise HTTPException(status_code=404, detail="Profile or job not found") from None
+            raise HTTPException(status_code=404, detail="Job not found; refresh the Jobs page") from None
         key = os.environ.get("OPENROUTER_API_KEY", "")
         if not key:
             env_file = Path(".env")
