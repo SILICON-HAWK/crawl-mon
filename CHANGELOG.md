@@ -25,6 +25,12 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Local profiles and decision analysis — 2026-10-31
+
+- Added per-user private JSON profiles and file directories, editable profile UI, responsive card/list views, and per-job decision-model analysis with separate dimensions and persisted results.
+- The free OpenRouter Respan model receives the saved profile and selected job only when the user clicks Analyze; its probabilities are experimental.
+- Bounded live feed retry extracted 748 records across four sources; one feed dominated and source normalization needs review. See `docs/changes/background-collection.md`.
+
 ## Local dashboard and bounded pipeline — 2026-10-31
 
 - Added Svelte/Vite dashboard and local FastAPI interface to inspect runs and start and monitor bounded feed collection and offline heuristic ranking.

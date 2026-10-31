@@ -1,3 +1,7 @@
+# Current profile and analysis work
+
+Profile data and files are ignored under `user-assets/<username>/`; the local API uses `JEVSCOUT_USER_ASSETS_DIR`. The abhi profile was initialized from local context; experience years was set to zero as an unknown placeholder and requires user correction. Per-job analysis uses the free OpenRouter Respan model after an explicit click and saves dimensional answers with the run. Results are experimental. See `docs/changes/background-collection.md` for live feeds and known source quality issues. User requested a separate full data-flow review, still pending.
+
 # Dashboard MVP continuation
 
 Local frontend, API, and bounded offline ranking pipeline are described in [frontend MVP](docs/frontend-mvp.md) and [plan](docs/frontend-mvp-plan.md). Stage-by-stage pipeline and decision-quality review remains a separate user-requested task. Pipeline state is in memory; it neither automatically reads the private résumé nor calls a decision model. Use TDD for future behavior changes and handoff for the next continuation. No remote push has been requested for this MVP.
