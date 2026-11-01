@@ -1,6 +1,6 @@
 # Wellfound diagnostic
 
-The user requested another attempt. A single public role page was retrieved through the environment proxy and imported with honest `manual-proxy-diagnostic` provenance as run `a13b3709-095d-446c-af9e-ec956b448087`; its 38 listings include 32 technical, with salary/location unknown. The scoped crawler's direct request timed out. A saved-page parser is implemented, but no automated Wellfound workflow exists. See docs/wellfound-research.md for source terms and proxy security tradeoffs. Existing feed-refresh CLI job should remain running; check its lock before starting another.
+The user requested another attempt. A single public role page was retrieved through the environment proxy and imported with honest `manual-proxy-diagnostic` provenance as run `a13b3709-095d-446c-af9e-ec956b448087`; its 38 listings include 32 technical, with salary/location unknown. The scoped crawler's direct request timed out. A saved-page parser is implemented, but no automated Wellfound workflow exists. See docs/wellfound-research.md for source terms and proxy security tradeoffs. Existing feed-refresh CLI job should remain running; check its lock before starting another. The backend suite passed: 183 tests, 9 skipped. Next request: provide a Make command for a built deployment separate from development, without disrupting the existing worker or overwriting private data.
 
 # Background feed refresh
 
