@@ -25,6 +25,11 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Bounded background feed refresh — 2026-11-01
+
+- Added an opt-in CLI worker for five known public feeds, one source and one page at a time, with persisted deadlines, rate spacing, robots crawl-delay and 24-hour failure backoff. Added status and graceful stop commands. The worker does not make model calls.
+- The user-requested session worker was started against `data/live-trial` and completed a SonicWall refresh. It is not installed as a system service.
+
 ## Tech feed, employer discovery and listing checks — 2026-11-01
 
 - Integrated Remote OK's public dev-tag feed with source and original listing attribution. A bounded live run saved 99 listings; 25 match the current technical-title filter.

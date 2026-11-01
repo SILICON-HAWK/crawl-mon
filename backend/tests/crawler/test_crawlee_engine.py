@@ -35,11 +35,13 @@ class Site:
         self.slow_paths = slow_paths or set()
         self.delay_seconds = delay_seconds
         self.hits: Counter[str] = Counter()
+        self.request_times = {}
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):
                 owner.hits[self.path] += 1
+                owner.request_times.setdefault(self.path, []).append(time.monotonic())
                 if self.path in owner.slow_paths:
                     time.sleep(owner.delay_seconds)
                 status, body, headers = owner.routes.get(self.path, (404, "missing", {}))
@@ -80,6 +82,14 @@ class CrawleeEngineTests(unittest.IsolatedAsyncioTestCase):
         pages: list[PageEvidence] = []
         report = await CrawleeEngine().collect(spec, pages.append, work_dir=work)
         return report, pages
+
+    async def test_scheduled_mode_respects_robots_crawl_delay(self):
+        with Site({"/robots.txt": (200, "User-agent: *\nAllow: /\nCrawl-delay: 1", {}),
+                   "/": (200, "<html>ok</html>", {})}) as site, TemporaryDirectory() as temp:
+            spec = RunSpec([site.origin + "/"], max_pages=1, timeout_seconds=10, allow_local=True)
+            report = await CrawleeEngine(minimum_request_interval=0.1, max_retries=0, respect_crawl_delay=True).collect(spec, lambda _: None, work_dir=Path(temp))
+            self.assertEqual(report.pages_saved, 1)
+            self.assertGreaterEqual(site.request_times["/"][0] - site.request_times["/robots.txt"][0], 0.9)
 
     async def test_duplicate_links_are_saved_once_and_depth_is_bounded(self):
         with Site({

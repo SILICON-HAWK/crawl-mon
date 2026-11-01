@@ -1,3 +1,7 @@
+# Background feed refresh
+
+The user explicitly chose a CLI job, not a system service. See README and docs/changes/feed-refresh.md. The active worker uses `data/live-trial`; use `--status` to verify the live lock, not the PID saved in the sandbox. `--stop` requests a graceful stop. It collects feeds, not AI decisions; WSL/session shutdown stops it. Snapshots accumulate.
+
 # Deployed discovery snapshot
 
 Stable port 8080 serves `frontend/dist-stable-discovery3`. Remote OK dev feed run saved 99 records; 25 pass the technical filter. User can start up to 100 listing checks from Jobs; previously tested checks include four reachable and one inconclusive. Employer feed discovery suggests recognized ATS feeds for explicit review and execution; it is not general company-career discovery. Processes are session-bound.

@@ -8,6 +8,7 @@ import logging
 import signal
 import socket
 import threading
+from urllib.robotparser import RobotFileParser
 from contextlib import asynccontextmanager, contextmanager
 from datetime import timedelta
 from pathlib import Path
@@ -180,6 +181,14 @@ class CrawleeEngine:
     name = "crawlee"
     version = "1.11.0"
 
+    def __init__(self, *, minimum_request_interval: float = 0, max_retries: int = 1,
+                 respect_crawl_delay: bool = False):
+        if minimum_request_interval < 0 or max_retries < 0:
+            raise ValueError("invalid crawler rate settings")
+        self.minimum_request_interval = minimum_request_interval
+        self.max_retries = max_retries
+        self.respect_crawl_delay = respect_crawl_delay
+
     async def collect(
         self,
         spec: RunSpec,
@@ -206,9 +215,35 @@ class CrawleeEngine:
                 crawler.stop(reason="Application collection task was cancelled.")
                 raise asyncio.CancelledError
 
+        request_times: dict[tuple[str, str, int], float] = {}
+        crawl_delays: dict[tuple[str, str, int], float] = {}
+
         async def request_guard(request: httpx2.Request) -> None:
             stop_if_cancelled()
             await _guard_request(request, origins=origins)
+            origin = _origin(str(request.url))
+            if origin is not None:
+                loop = asyncio.get_running_loop()
+                interval = max(self.minimum_request_interval, crawl_delays.get(origin, 0))
+                remaining = request_times.get(origin, 0) + interval - loop.time()
+                if remaining > 0:
+                    await asyncio.sleep(remaining)
+                stop_if_cancelled()
+                request_times[origin] = loop.time()
+
+        async def inspect_robots(response: httpx2.Response) -> None:
+            if not self.respect_crawl_delay or response.request.url.path != "/robots.txt" or response.status_code != 200:
+                return
+            body = await response.aread()
+            parser = RobotFileParser()
+            parser.parse(body.decode("utf-8", errors="replace").splitlines())
+            agent = response.request.headers.get("user-agent", "*")
+            delay = parser.crawl_delay(agent)
+            if delay is None:
+                delay = parser.crawl_delay("*")
+            origin = _origin(str(response.request.url))
+            if origin is not None and delay is not None:
+                crawl_delays[origin] = max(0, delay)
 
         client = _ScopedHttpxHttpClient(
             network_backend=network_backend,
@@ -216,7 +251,7 @@ class CrawleeEngine:
             follow_redirects=False,
             trust_env=False,
             timeout=min(max(spec.timeout_seconds, 1), 30),
-            event_hooks={"request": [request_guard]},
+            event_hooks={"request": [request_guard], "response": [inspect_robots]},
         )
         crawler = BeautifulSoupCrawler(
             configuration=Configuration(
@@ -232,7 +267,7 @@ class CrawleeEngine:
             ),
             max_crawl_depth=spec.max_depth,
             max_requests_per_crawl=spec.max_pages,
-            max_request_retries=1,
+            max_request_retries=self.max_retries,
             max_session_rotations=0,
             use_session_pool=False,
             respect_robots_txt_file=True,

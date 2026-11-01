@@ -85,3 +85,23 @@ Employer-feed candidates are inferred only from known Greenhouse, Ashby, and Lev
 On Jobs, **Check listings** starts an explicit background check of up to 100 application URLs; repeat to cover additional unchecked jobs. HTTP 200 means the page responded, not that the position is definitely open. HTTP 404/410 is marked not found; redirects, rate limits, other responses and network failures are inconclusive. The API stores results separately, prioritizes reachable pages, and leaves issues visible in the **Check needed** filter. Checking is sequential and can take time. The source checks do not follow redirects and reject local/private network destinations.
 
 See [tech-source research](docs/tech-source-research.md) and [listing availability notes](docs/changes/availability.md). The Remote OK API is public and requests should be modest; follow its [source documentation](https://remoteok.featurebase.app/help/articles/3140840-is-there-an-api-or-rssjson-feed-of-remote-jobs) and attribution requirements.
+
+## Background feed refresh
+
+Start the optional, explicitly approved CLI worker from the repository root:
+
+```sh
+PYTHONPATH=backend/src .venv/bin/python -m jevscout.application.feed_refresh \
+  --data-dir data/live-trial --approve
+```
+
+The worker refreshes five previously configured public feeds: Remote OK (`dev`), SonicWall, Firstwork, TransPerfect and Nexthire. It runs one feed at a time, at most one feed page per run, at least 12 hours between successful refreshes of the same feed, at least 60 seconds between feed starts, and waits 24 hours after a failed or partial refresh. It makes no immediate request retries. Within a scheduled crawl it waits at least two seconds between same-origin HTTP requests and honors integer `Crawl-delay` values returned in robots.txt when they are larger. Robots allow/disallow still applies. These limits apply to this worker; manual crawls are separate.
+
+To inspect or stop it, from another terminal:
+
+```sh
+PYTHONPATH=backend/src .venv/bin/python -m jevscout.application.feed_refresh --data-dir data/live-trial --status
+PYTHONPATH=backend/src .venv/bin/python -m jevscout.application.feed_refresh --data-dir data/live-trial --stop
+```
+
+The stop is graceful; an in-flight request may finish first. A local lock prevents a second refresh worker using the same data directory, and its schedule survives a worker restart. It does not install a system service or automatically restart when WSL or the session stops. It collects and extracts records but does not run the decision model. Saved snapshots are retained, so disk usage will grow over time. The source list is fixed in `backend/src/jevscout/application/feed_refresh.py` for this first version; change it deliberately rather than pointing the worker at arbitrary sites.
