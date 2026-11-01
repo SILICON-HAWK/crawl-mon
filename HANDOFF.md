@@ -1,3 +1,7 @@
+# Built deployment
+
+`make deploy-built` builds `frontend/dist-built` and serves the production API and frontend on loopback port 8081, using `data/live-trial` and existing user assets. Set `BUILT_HOST` to the WSL Tailscale IP for phone access; the app has no login. `make build-built` and `make run-built` are separate build/run steps. The feed-refresh CLI worker remains separate and must not be duplicated. Avoid concurrent writes from app instances sharing filesystem stores. The build and isolated HTTP smoke checks passed; see docs/changes/built-deploy.md.
+
 # Wellfound diagnostic
 
 The user requested another attempt. A single public role page was retrieved through the environment proxy and imported with honest `manual-proxy-diagnostic` provenance as run `a13b3709-095d-446c-af9e-ec956b448087`; its 38 listings include 32 technical, with salary/location unknown. The scoped crawler's direct request timed out. A saved-page parser is implemented, but no automated Wellfound workflow exists. See docs/wellfound-research.md for source terms and proxy security tradeoffs. Existing feed-refresh CLI job should remain running; check its lock before starting another. The backend suite passed: 183 tests, 9 skipped. Next request: provide a Make command for a built deployment separate from development, without disrupting the existing worker or overwriting private data.

@@ -2,6 +2,10 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Built deployment
+
+- Added Make targets for a separate production frontend build and local API server, with configurable host, port and data directory. The existing feed worker remains independent. Verified the build, homepage, Jobs route, Jobs API and occupied-port handling on an isolated port.
+
 ## Subsystem test organization — 2026-10-30
 
 - Grouped tests into core, crawler, CLI, filesystem storage, database, feeds, scoring, utilities, and Docker packages; centralized shared fixture support.

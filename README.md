@@ -76,6 +76,20 @@ The Python package lives in `backend/src/jevscout`: `core` defines run models an
 
 For the local dashboard and bounded pipeline, see [Frontend MVP](docs/frontend-mvp.md).
 
+## Run a built local app
+
+Build and serve a production frontend snapshot together with the FastAPI backend:
+
+```sh
+make deploy-built
+```
+
+This uses `frontend/dist-built` for the built snapshot and serves on `127.0.0.1:8081` by default. It does not replace the Vite development server (`5173`) or the existing stable deployment (`8080`). The API uses `data/live-trial` and `user-assets/`, so existing runs and profile data remain available. Avoid submitting concurrent write operations through multiple app instances sharing these stores; they do not provide a multi-writer guarantee. Keep the background feed refresh worker as its separate CLI process; this command does not create another feed worker. The API's explicitly submitted pipeline actions remain available.
+
+Use `make build-built` to build without starting a server, or `make run-built` to serve an existing snapshot. Override `BUILT_PORT`, `BUILT_HOST`, `BUILT_FRONTEND_DIR`, and `DATA_DIR` when needed, for example `make deploy-built BUILT_PORT=8082`. If the selected address is occupied, startup exits with an error and leaves the existing process alone. Details and current pipeline limits are in [built deployment notes](docs/changes/built-deploy.md).
+
+For phone access over Tailscale, set `BUILT_HOST` to your WSL Tailscale IP and open `http://<tailscale-ip>:8081` on your phone. The app has no login, so only bind to a network whose access you trust.
+
 ## Tech feed and listing checks
 
 The Runs page can add the public **Remote OK** developer-tagged feed, or recognized employer-feed candidates from saved job links. Remote OK results retain a link to the original posting and attribution to Remote OK. The tag is a discovery hint; the shared technical-job filter still classifies extracted titles. The live feed returned 99 listings in the initial bounded run, with 25 matching the current technical filter. Feed content and availability change over time.
