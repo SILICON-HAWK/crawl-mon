@@ -38,3 +38,9 @@ JEVSCOUT_DATA_DIR=data/live-trial JEVSCOUT_USER_ASSETS_DIR=user-assets \
 ```
 
 Replace the host address with this machine's current Tailscale IP (`tailscale ip -4`). The built snapshot is independent of the Vite development server on port 5173; it changes only on a subsequent build to `dist-stable`. Restart the stable API process after backend changes. The two API processes share filesystem data but each has its own in-memory pipeline status. The application has no login, so anyone with network access can inspect profile data and initiate operations. Processes started this way are not registered as persistent services.
+
+## Source discovery and listing status
+
+The Runs screen can add Remote OK's `dev` feed or a recognized employer feed suggested from saved job links. These suggestions require user review and explicit pipeline start; only known Greenhouse, Ashby and Lever link patterns are recognized. A board listing link or a feed response is not proof an employer's role is still open.
+
+The Jobs screen offers an explicit **Check listings** action and a **Check needed** filter. Availability records are stored in `data/live-trial/listing-availability.json` (under the configured data root). The result is a point-in-time HTTP observation; 200 means reachable, 404/410 means not found, and redirects, other statuses and errors are inconclusive. The background check state is process-local, but each completed URL result is persisted. Checks do not follow redirects or reach private network addresses.

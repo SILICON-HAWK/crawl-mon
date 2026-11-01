@@ -13,6 +13,7 @@ from jevscout.adapters.sources.greenhouse import parse_greenhouse_feed
 from jevscout.adapters.sources.lever import parse_lever_feed
 from jevscout.adapters.sources.recruitee import parse_recruitee_feed
 from jevscout.adapters.sources.teamtailor import parse_teamtailor_feed
+from jevscout.adapters.sources.remoteok import parse_remoteok_feed
 
 logger = logging.getLogger("jevscout.adapters.sources.registry")
 
@@ -22,6 +23,8 @@ def detect_feed_type(payload_json: str, source_url: str | None = None) -> str | 
     # 1. URL-based detection
     if source_url:
         host = (urlsplit(source_url).hostname or "").lower()
+        if host in {"remoteok.com", "www.remoteok.com"} and urlsplit(source_url).path.rstrip("/") == "/api":
+            return "remoteok"
         if "greenhouse.io" in host:
             return "greenhouse"
         if "lever.co" in host:
@@ -74,6 +77,8 @@ def detect_and_parse_feed(
     """Detect the feed type and extract structured JobPosting records."""
     feed_type = detect_feed_type(payload_json, source_url)
 
+    if feed_type == "remoteok":
+        return parse_remoteok_feed(payload_json, source_url, artifact_ref, india_only=india_only)
     if feed_type == "greenhouse":
         return parse_greenhouse_feed(payload_json, source_url, artifact_ref, india_only=india_only)
     if feed_type == "lever":

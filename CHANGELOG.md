@@ -25,6 +25,12 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Tech feed, employer discovery and listing checks — 2026-11-01
+
+- Integrated Remote OK's public dev-tag feed with source and original listing attribution. A bounded live run saved 99 listings; 25 match the current technical-title filter.
+- Added recognized ATS employer-feed candidates for user review and explicit collection. Employer names use explicit posting data or configured identities, rather than departments.
+- Added bounded background page checks, independent persisted results, reachable-first ordering and an issue filter. HTTP status is a reachability signal, not proof a job is open.
+
 ## Wellfound research and undetermined job types — 2026-10-31
 
 - Researched official Wellfound access and documented that no supported candidate-facing job-discovery API was found; no Wellfound crawler was added.

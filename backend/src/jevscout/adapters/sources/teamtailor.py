@@ -62,7 +62,10 @@ def parse_teamtailor_feed(
 
         normalized_loc = normalize_india_location(raw_location) if is_india else (raw_location or None)
 
-        department = _text(item.get("department"))
+        company_value = item.get("company") or item.get("company_name")
+        if isinstance(company_value, dict):
+            company_value = company_value.get("name")
+        company = _text(company_value)
         body_content = item.get("body") or item.get("description")
         description = sanitize_description(body_content)
 
@@ -78,7 +81,7 @@ def parse_teamtailor_feed(
                 "parser_version": PARSER_VERSION,
                 "title": title,
                 "salary": _salary_display(item.get("salary") or item.get("salary_range")),
-                "company": department,
+                "company": company,
                 "location": raw_location or None,
                 "location_normalized": normalized_loc,
                 "is_india": is_india,

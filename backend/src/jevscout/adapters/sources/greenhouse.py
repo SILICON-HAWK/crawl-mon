@@ -75,13 +75,11 @@ def parse_greenhouse_feed(
 
         normalized_loc = normalize_india_location(full_location_str) if is_india else full_location_str
 
-        # Company / Department
-        departments = item.get("departments")
-        department_name = None
-        if isinstance(departments, list) and departments:
-            first_dept = departments[0]
-            if isinstance(first_dept, dict):
-                department_name = _text(first_dept.get("name"))
+        # Greenhouse's standard public board payload has no employer field.
+        company_value = item.get("company") or item.get("company_name")
+        if isinstance(company_value, dict):
+            company_value = company_value.get("name")
+        company = _text(company_value)
 
         # Description / Content
         raw_content = item.get("content")
@@ -103,7 +101,7 @@ def parse_greenhouse_feed(
                 "parser_version": PARSER_VERSION,
                 "title": title,
                 "salary": _salary_display(item.get("salary") or item.get("salary_range")),
-                "company": department_name,  # Or board name from context
+                "company": company,
                 "location": full_location_str or None,
                 "location_normalized": normalized_loc,
                 "is_india": is_india,

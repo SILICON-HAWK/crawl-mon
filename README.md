@@ -75,3 +75,13 @@ See [Subsystem test suites](backend/tests/README.md) for core, crawler, database
 The Python package lives in `backend/src/jevscout`: `core` defines run models and crawler contracts; `application` coordinates use cases; `modules/jobs` contains job extraction and scoring; `adapters` contains Crawlee and source integrations; `storage` contains persistence implementations; and `interfaces` contains the CLI. Python imports have moved to these paths.
 
 For the local dashboard and bounded pipeline, see [Frontend MVP](docs/frontend-mvp.md).
+
+## Tech feed and listing checks
+
+The Runs page can add the public **Remote OK** developer-tagged feed, or recognized employer-feed candidates from saved job links. Remote OK results retain a link to the original posting and attribution to Remote OK. The tag is a discovery hint; the shared technical-job filter still classifies extracted titles. The live feed returned 99 listings in the initial bounded run, with 25 matching the current technical filter. Feed content and availability change over time.
+
+Employer-feed candidates are inferred only from known Greenhouse, Ashby, and Lever job-board URL patterns; they are unverified suggestions, not proof the employer is hiring or a general web search. Review a candidate and explicitly start a pipeline to fetch its current board. Unknown employer sites remain unresolved. Company names come from explicit source fields or a small configured board mapping; unknown names are not guessed.
+
+On Jobs, **Check listings** starts an explicit background check of up to 100 application URLs; repeat to cover additional unchecked jobs. HTTP 200 means the page responded, not that the position is definitely open. HTTP 404/410 is marked not found; redirects, rate limits, other responses and network failures are inconclusive. The API stores results separately, prioritizes reachable pages, and leaves issues visible in the **Check needed** filter. Checking is sequential and can take time. The source checks do not follow redirects and reject local/private network destinations.
+
+See [tech-source research](docs/tech-source-research.md) and [listing availability notes](docs/changes/availability.md). The Remote OK API is public and requests should be modest; follow its [source documentation](https://remoteok.featurebase.app/help/articles/3140840-is-there-an-api-or-rssjson-feed-of-remote-jobs) and attribution requirements.

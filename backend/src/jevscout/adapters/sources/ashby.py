@@ -75,7 +75,7 @@ def parse_ashby_feed(
 
         normalized_loc = normalize_india_location(active_location) if is_india else (active_location or None)
 
-        department = _text(item.get("department"))
+        company = _explicit_company(item)
         description = sanitize_description(item.get("descriptionHtml"))
 
         app_url = _safe_url(item.get("jobUrl"), source_url)
@@ -95,7 +95,7 @@ def parse_ashby_feed(
                 "parser_version": PARSER_VERSION,
                 "title": title,
                 "salary": salary,
-                "company": department,
+                "company": company,
                 "location": active_location or None,
                 "location_normalized": normalized_loc,
                 "is_india": is_india,
@@ -114,3 +114,11 @@ def parse_ashby_feed(
         len(results),
     )
     return results
+
+
+def _explicit_company(item: dict[str, Any]) -> str | None:
+    """Return an employer only when the posting explicitly names one."""
+    value = item.get("company") or item.get("companyName") or item.get("organizationName")
+    if isinstance(value, dict):
+        value = value.get("name")
+    return _text(value)

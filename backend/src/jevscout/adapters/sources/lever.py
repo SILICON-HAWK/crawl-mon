@@ -48,6 +48,10 @@ def parse_lever_feed(
         if isinstance(categories, dict):
             raw_location = _text(categories.get("location")) or ""
             team = _text(categories.get("team"))
+        company_value = item.get("company") or item.get("companyName")
+        if isinstance(company_value, dict):
+            company_value = company_value.get("name")
+        company = _text(company_value)
 
         workplace_type = _text(item.get("workplaceType"))
 
@@ -88,7 +92,7 @@ def parse_lever_feed(
                 "parser_version": PARSER_VERSION,
                 "title": title,
                 "salary": _salary_display(item.get("salaryDescription") or item.get("salaryRange")),
-                "company": team,
+                "company": company,
                 "location": raw_location or None,
                 "location_normalized": normalized_loc,
                 "is_india": is_india,

@@ -67,7 +67,10 @@ def parse_recruitee_feed(
 
         normalized_loc = normalize_india_location(raw_location) if is_india else (raw_location or None)
 
-        department = _text(item.get("department"))
+        company_value = item.get("company") or item.get("company_name")
+        if isinstance(company_value, dict):
+            company_value = company_value.get("name")
+        company = _text(company_value)
         description = sanitize_description(item.get("description"))
 
         app_url = _safe_url(item.get("careers_url"), source_url)
@@ -82,7 +85,7 @@ def parse_recruitee_feed(
                 "parser_version": PARSER_VERSION,
                 "title": title,
                 "salary": _salary_display(item.get("salary") or item.get("salary_range")),
-                "company": department,
+                "company": company,
                 "location": raw_location or None,
                 "location_normalized": normalized_loc,
                 "is_india": is_india,

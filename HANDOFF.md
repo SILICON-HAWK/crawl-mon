@@ -1,3 +1,11 @@
+# Deployed discovery snapshot
+
+Stable port 8080 serves `frontend/dist-stable-discovery3`. Remote OK dev feed run saved 99 records; 25 pass the technical filter. User can start up to 100 listing checks from Jobs; previously tested checks include four reachable and one inconclusive. Employer feed discovery suggests recognized ATS feeds for explicit review and execution; it is not general company-career discovery. Processes are session-bound.
+
+# Tech feeds and listing checks
+
+Remote OK dev-tag feed is integrated; live run `fe444d10-18b1-4bd0-bda8-236251bffed6` saved 99 records, 25 currently technical. See docs/tech-source-research.md and README for attribution, source-discovery limits and checks. Listing status is persisted under the data root, with reachable pages first and an issue filter; checking must be started explicitly. Do not equate HTTP 200 with an active opening. Original feed and company data are preserved; configured employer source mappings live in `company_identity.py`.
+
 # Wellfound and semantic search
 
 Wellfound research found no verified supported candidate-facing collection path; see docs/wellfound-research.md. Shared classifier preserves undetermined job types and Jobs API exposes them with technical_only=false. Vector grouping remains a future task; see docs/vector-search-research.md and docs/roadmap.md. Stable API has the updated classifier.

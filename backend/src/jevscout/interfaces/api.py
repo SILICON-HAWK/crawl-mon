@@ -22,6 +22,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from jevscout.storage.filesystem import FileRunStore
 from jevscout.application.profile import ProfileStore
 from jevscout.application.job_actions import JobActionsStore
+from jevscout.application.availability import AvailabilityStore, AvailabilityManager
 
 
 class CandidateProfileInput(BaseModel):
@@ -60,6 +61,12 @@ class ClassificationRequest(BaseModel):
     username: str
     run_id: str
     job_index: int = Field(ge=0, le=100000)
+
+
+class AvailabilityRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    urls: list[str] = Field(min_length=1, max_length=100)
+    approved: Literal[True]
 
 
 class ProfileInput(BaseModel):
@@ -126,6 +133,9 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
     app.state.profile_store = profile_store
     job_actions_store = JobActionsStore(profile_root)
     app.state.job_actions_store = job_actions_store
+    availability_store = AvailabilityStore(run_store.root / "listing-availability.json")
+    availability_manager = AvailabilityManager(availability_store)
+    app.state.availability_manager = availability_manager
 
     if pipeline_manager is None:
         from jevscout.application.pipeline import PipelineManager
@@ -141,6 +151,7 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
     def list_jobs(technical_only: bool = True) -> list[dict[str, Any]]:
         """Aggregate saved extracted jobs, newest run first, retaining source indices."""
         from jevscout.modules.jobs.filters import classify_job_category
+        from jevscout.modules.jobs.company_identity import resolve_company
         records = sorted(run_store.list_runs(), key=lambda record: record.created_at, reverse=True)
         jobs: list[dict[str, Any]] = []
         by_url: dict[str, dict[str, Any]] = {}
@@ -150,7 +161,7 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
                 if technical_only and category != "technical":
                     continue
                 provenance = {"run_id": record.id, "job_index": job_index}
-                job = {**source_job, "job_category": category, **provenance, "originals": [provenance]}
+                job = {**source_job, "company": resolve_company(source_job), "job_category": category, **provenance, "originals": [provenance]}
                 key = _canonical_application_url(source_job.get("application_url"))
                 existing = by_url.get(key) if key else None
                 if existing is not None:
@@ -159,7 +170,39 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
                 jobs.append(job)
                 if key:
                     by_url[key] = job
+        checks = availability_store.read()
+        for job in jobs:
+            record = checks.get(job.get("application_url"))
+            job["availability"] = record.to_dict() if record else None
+        priority = {"available": 0, "unknown": 2, "unavailable": 3}
+        jobs.sort(key=lambda job: priority.get((job.get("availability") or {}).get("state"), 1))
         return jobs
+
+    @app.get("/api/company-sources")
+    def company_sources() -> list[dict[str, Any]]:
+        """Suggest recognized employer-hosted feeds from saved job links."""
+        from jevscout.modules.jobs.company_discovery import career_feed_candidate
+        candidates: dict[str, dict[str, Any]] = {}
+        for job in list_jobs():
+            for link in (job.get("application_url"), job.get("listing_url")):
+                feed = career_feed_candidate(link)
+                if feed and feed not in candidates:
+                    candidates[feed] = {"company": job.get("company"), "feed_url": feed,
+                                        "discovered_from": link, "status": "unverified"}
+        return list(candidates.values())
+
+    @app.get("/api/availability")
+    def availability_status() -> dict[str, Any]:
+        return availability_manager.status()
+
+    @app.post("/api/availability/check", status_code=202)
+    def check_availability(request: AvailabilityRequest) -> dict[str, Any]:
+        try:
+            return availability_manager.start(request.urls)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid listing URLs") from None
+        except RuntimeError:
+            raise HTTPException(status_code=409, detail="An availability check is already running") from None
 
     @app.get("/api/profile/{username}")
     def get_profile(username: str) -> dict[str, Any]:

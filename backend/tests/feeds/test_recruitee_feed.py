@@ -70,3 +70,13 @@ class RecruiteeFeedTests(unittest.TestCase):
             india_only=True,
         )
         self.assertEqual(jobs, [])
+
+    def test_company_is_null_without_explicit_employer(self):
+        jobs = parse_recruitee_feed(self.payload, self.source_url, self.artifact_ref, india_only=False)
+        self.assertTrue(all(job["company"] is None for job in jobs))
+
+    def test_extracts_explicit_company(self):
+        payload = json.loads(self.payload)
+        payload["offers"][0]["company"] = {"name": "Tech Co"}
+        jobs = parse_recruitee_feed(json.dumps(payload), self.source_url, self.artifact_ref, india_only=False)
+        self.assertEqual(jobs[0]["company"], "Tech Co")
