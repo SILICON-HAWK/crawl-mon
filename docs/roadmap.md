@@ -4,6 +4,7 @@ Historical job-focused roadmap. The current [Execution plan](execution-plan.md) 
 
 ## Current follow-ups
 
+- [ ] Evaluate SQLite for transactional local persistence and cross-process coordination, including migration of runs, jobs, profiles and decisions, and shared pipeline progress. Atomic JSON writes and individual file locks do not provide a whole-application multi-writer guarantee.
 - [ ] Review undetermined job types and build a transparent determination workflow; preserve original evidence.
 - [ ] Investigate Wellfound only when a supported, permitted candidate-facing feed or agreement exists; see [Wellfound research](wellfound-research.md).
 - [ ] Evaluate job similarity and search using labeled examples and resource measurements before adding embeddings; see [vector search research](vector-search-research.md).

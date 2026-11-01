@@ -125,7 +125,7 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
     """Build an API app, allowing tests and embedding hosts to inject stores."""
     app = FastAPI(title="JevScout local API", version="0.1.0")
     run_store = store or FileRunStore(
-        Path(os.environ.get("JEVSCOUT_DATA_DIR", "data"))
+        Path(os.environ.get("JEVSCOUT_DATA_DIR", "data/live-trial"))
     )
     app.state.run_store = run_store
     profile_root = Path(os.environ.get("JEVSCOUT_USER_ASSETS_DIR", str((run_store.root / "user-assets") if store is not None else Path("user-assets"))))

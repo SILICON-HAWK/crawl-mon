@@ -7,7 +7,7 @@ From the repository root, install the backend web and crawler extras and the fro
 cd frontend && npm ci
 ```
 
-Start the API from the repository root in one terminal. The data directory defaults to `data/`; set `JEVSCOUT_DATA_DIR=data/live-trial` to view the earlier test runs.
+Start the API from the repository root in one terminal. The data directory defaults to `data/live-trial`, matching the built app and feed worker; set `JEVSCOUT_DATA_DIR` to override it.
 
 ```sh
 JEVSCOUT_DATA_DIR=data/live-trial .venv/bin/uvicorn jevscout.interfaces.api:app --host 127.0.0.1 --port 8000
