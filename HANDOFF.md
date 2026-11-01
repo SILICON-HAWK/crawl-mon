@@ -2,7 +2,7 @@
 
 Development and built APIs now default to the same `data/live-trial` and `user-assets` paths; explicit environment overrides still take precedence. Existing running API processes need a restart to pick up the new default. SQLite and cross-process coordination are follow-ups in docs/roadmap.md; sharing files does not guarantee concurrent-write safety.
 
-`make deploy-built` builds `frontend/dist-built` and serves the production API and frontend on loopback port 8081, using `data/live-trial` and existing user assets. Set `BUILT_HOST` to the WSL Tailscale IP for phone access; the app has no login. `make build-built` and `make run-built` are separate build/run steps. The feed-refresh CLI worker remains separate and must not be duplicated. Avoid concurrent writes from app instances sharing filesystem stores. The build and isolated HTTP smoke checks passed; see docs/changes/built-deploy.md.
+`make deploy-built` builds `frontend/dist-built` and serves the production API and frontend on all IPv4 interfaces on port 8081, using `data/live-trial` and existing user assets. It can be reached via localhost and Tailscale, but the app has no login and other reachable networks may also have access; set `BUILT_HOST=127.0.0.1` to restrict it. `make build-built` and `make run-built` are separate build/run steps. The feed-refresh CLI worker remains separate and must not be duplicated. Avoid concurrent writes from app instances sharing filesystem stores. See docs/changes/built-deploy.md.
 
 # Wellfound diagnostic
 

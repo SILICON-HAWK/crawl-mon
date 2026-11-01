@@ -4,6 +4,7 @@ Record user-visible behavior, verification, and limitations for each usable slic
 
 ## Built deployment
 
+- The built app now listens on all IPv4 interfaces by default, making it reachable via localhost and Tailscale; `BUILT_HOST` can restrict the bind. Verified both addresses on an isolated port.
 - Aligned the development API's default data directory with the built app and feed worker (`data/live-trial`), while retaining configuration overrides. Added local transactional persistence and coordination to the roadmap.
 - Added Make targets for a separate production frontend build and local API server, with configurable host, port and data directory. The existing feed worker remains independent. Verified the build, homepage, Jobs route, Jobs API and occupied-port handling on an isolated port.
 

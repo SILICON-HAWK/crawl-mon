@@ -3,7 +3,7 @@ set -eu
 
 uvicorn_bin=${1:-.venv/bin/uvicorn}
 frontend_dir=${JEVSCOUT_FRONTEND_DIR:-frontend/dist-built}
-host=${BUILT_HOST:-127.0.0.1}
+host=${BUILT_HOST:-0.0.0.0}
 port=${BUILT_PORT:-8081}
 
 if [ ! -x "$uvicorn_bin" ]; then

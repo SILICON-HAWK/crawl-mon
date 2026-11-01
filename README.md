@@ -84,13 +84,13 @@ Build and serve a production frontend snapshot together with the FastAPI backend
 make deploy-built
 ```
 
-This uses `frontend/dist-built` for the built snapshot and serves on `127.0.0.1:8081` by default. It does not replace the Vite development server (`5173`) or the existing stable deployment (`8080`). The API uses `data/live-trial` and `user-assets/`, so existing runs and profile data remain available. Avoid submitting concurrent write operations through multiple app instances sharing these stores; they do not provide a multi-writer guarantee. Keep the background feed refresh worker as its separate CLI process; this command does not create another feed worker. The API's explicitly submitted pipeline actions remain available.
+This uses `frontend/dist-built` for the built snapshot and listens on all IPv4 interfaces (`0.0.0.0:8081`) by default. It does not replace the Vite development server (`5173`) or the existing stable deployment (`8080`). The API uses `data/live-trial` and `user-assets/`, so existing runs and profile data remain available. Avoid submitting concurrent write operations through multiple app instances sharing these stores; they do not provide a multi-writer guarantee. Keep the background feed refresh worker as its separate CLI process; this command does not create another feed worker. The API's explicitly submitted pipeline actions remain available.
 
 The development API uses the same default data and user-assets directories. An explicit `JEVSCOUT_DATA_DIR` or `JEVSCOUT_USER_ASSETS_DIR` overrides those defaults, so configure both instances consistently when using custom paths.
 
 Use `make build-built` to build without starting a server, or `make run-built` to serve an existing snapshot. Override `BUILT_PORT`, `BUILT_HOST`, `BUILT_FRONTEND_DIR`, and `DATA_DIR` when needed, for example `make deploy-built BUILT_PORT=8082`. If the selected address is occupied, startup exits with an error and leaves the existing process alone. Details and current pipeline limits are in [built deployment notes](docs/changes/built-deploy.md).
 
-For phone access over Tailscale, set `BUILT_HOST` to your WSL Tailscale IP and open `http://<tailscale-ip>:8081` on your phone. The app has no login, so only bind to a network whose access you trust.
+Open `http://localhost:8081` on the WSL host, or `http://<wsl-tailscale-ip>:8081` from a connected Tailscale device. Windows localhost forwarding and network firewall rules may affect access. The app has no login: listening on all interfaces can also expose it to other reachable networks. To restrict it to localhost, use `make deploy-built BUILT_HOST=127.0.0.1`; to restrict it to Tailscale, set `BUILT_HOST` to the WSL Tailscale IP.
 
 ## Tech feed and listing checks
 

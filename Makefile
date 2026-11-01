@@ -2,7 +2,7 @@ PYTHON ?= .venv/bin/python
 UVICORN ?= .venv/bin/uvicorn
 NPM ?= npm
 BUILT_FRONTEND_DIR ?= frontend/dist-built
-BUILT_HOST ?= 127.0.0.1
+BUILT_HOST ?= 0.0.0.0
 BUILT_PORT ?= 8081
 DATA_DIR ?= data/live-trial
 
