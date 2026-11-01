@@ -2,6 +2,13 @@
 
 Record user-visible behavior, verification, and limitations for each usable slice. Dates are UTC. Agent contribution notes live in `docs/changes/`; the coordinator reviews and incorporates them here before committing. Do not record credentials or private source/profile data.
 
+## Pre-ranking, card UI, architecture and all-jobs pages — 2026-11-01
+
+- Added model-free structured pre-ranking (`modules/jobs/prerank.py`): loose title, location and salary match against the profile, 0-100. `GET /api/jobs?username=` attaches `pre_rank`; order is unchanged. See `docs/changes/pre-rank.md`.
+- Frontend: redesigned job cards with a shared `JobCard`/`PreRank`, Best match/Newest sort, loading and empty states, mobile and accessibility polish; new `/architecture` page (interactive data-flow diagram) and a `/all-jobs` debug page (footer, Debug / Logs) with Department, Location, Source and Company checkbox filters. Production deep links added for both.
+- Make targets `dev`, `dev-api`, `dev-web`, `dev-and-built`.
+- Verification: backend 195 tests passed (9 skipped) before the deep-link additions; route test passes; frontend builds without warnings. UI was not checked in a browser. Salary is neutral until a profile minimum is set; exchange rates are fixed approximations.
+
 ## Built deployment
 
 - The built app now listens on all IPv4 interfaces by default, making it reachable via localhost and Tailscale; `BUILT_HOST` can restrict the bind. Verified both addresses on an isolated port.

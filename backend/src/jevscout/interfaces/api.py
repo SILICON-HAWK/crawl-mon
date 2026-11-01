@@ -148,8 +148,19 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
         return [record.to_dict() for record in run_store.list_runs()]
 
     @app.get("/api/jobs")
-    def list_jobs(technical_only: bool = True) -> list[dict[str, Any]]:
-        """Aggregate saved extracted jobs, newest run first, retaining source indices."""
+    def list_jobs(technical_only: bool = True, username: str | None = None) -> list[dict[str, Any]]:
+        """Aggregate saved extracted jobs, newest run first, retaining source indices.
+
+        With ``username``, each job also carries a model-free ``pre_rank`` (title,
+        salary and location match against that profile); order is unchanged.
+        """
+        from jevscout.modules.jobs.prerank import pre_rank
+        profile_fields = None
+        if username is not None:
+            try:
+                profile_fields = profile_store.get(username).get("structured_fields") or {}
+            except (ValueError, TypeError, OSError, json.JSONDecodeError):
+                raise HTTPException(status_code=422, detail="Invalid profile") from None
         from jevscout.modules.jobs.filters import classify_job_category
         from jevscout.modules.jobs.company_identity import resolve_company
         records = sorted(run_store.list_runs(), key=lambda record: record.created_at, reverse=True)
@@ -174,6 +185,8 @@ def create_app(*, store: Any | None = None, pipeline_manager: Any | None = None)
         for job in jobs:
             record = checks.get(job.get("application_url"))
             job["availability"] = record.to_dict() if record else None
+            if profile_fields is not None:
+                job["pre_rank"] = pre_rank(job, profile_fields)
         priority = {"available": 0, "unknown": 2, "unavailable": 3}
         jobs.sort(key=lambda job: priority.get((job.get("availability") or {}).get("state"), 1))
         return jobs

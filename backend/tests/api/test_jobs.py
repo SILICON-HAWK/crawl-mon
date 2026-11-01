@@ -70,3 +70,35 @@ class JobsApiTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class JobsPreRankApiTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.store = FileRunStore(Path(self.temporary.name))
+        self.client = TestClient(create_app(store=self.store, pipeline_manager=object()))
+        run = self.store.create(RunSpec(["https://source.test/x"]))
+        self.store.save_results(run.id, [
+            {"title": "Forward Deployed AI Engineer", "location": "India",
+             "application_url": "https://jobs.test/a"},
+            {"title": "Software Engineer", "location": "Berlin, Germany",
+             "application_url": "https://jobs.test/b"},
+        ])
+
+    def tearDown(self):
+        self.temporary.cleanup()
+
+    def test_pre_rank_attached_only_when_username_given(self):
+        plain = self.client.get("/api/jobs").json()
+        self.assertTrue(all("pre_rank" not in job for job in plain))
+        self.client.put("/api/profile/tester", json={
+            "freeform_context": "", "structured_fields": {
+                "role_target": "AI Forward Deployed Engineer", "primary_skills": ["Python"],
+                "experience_years": 2, "preferred_locations": ["India"], "remote_only": False}})
+        ranked = self.client.get("/api/jobs", params={"username": "tester"}).json()
+        by_url = {job["application_url"]: job["pre_rank"] for job in ranked}
+        self.assertGreater(by_url["https://jobs.test/a"]["score"], by_url["https://jobs.test/b"]["score"])
+        self.assertEqual(set(by_url["https://jobs.test/a"]), {"score", "title", "salary", "location", "reasons"})
+
+    def test_invalid_username_is_rejected(self):
+        self.assertEqual(self.client.get("/api/jobs", params={"username": "../x"}).status_code, 422)

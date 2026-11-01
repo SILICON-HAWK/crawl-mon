@@ -14,7 +14,7 @@ class FrontendRoutes(TestCase):
             with patch.dict(os.environ, {'JEVSCOUT_FRONTEND_DIR': directory}):
                 production = importlib.import_module('jevscout.interfaces.production')
                 client = TestClient(production.app)
-                for path in ('/jobs', '/runs', '/profile'):
+                for path in ('/jobs', '/runs', '/profile', '/architecture', '/all-jobs'):
                     response = client.get(path)
                     self.assertEqual(response.status_code, 200)
                     self.assertIn('JevScout test', response.text)
