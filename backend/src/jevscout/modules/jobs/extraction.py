@@ -216,6 +216,11 @@ def parse_jobs(
     from jevscout.adapters.sources.location import is_india_eligible
     from jevscout.adapters.sources.registry import detect_and_parse_feed
 
+    from jevscout.adapters.sources.wellfound import parse_wellfound_role
+    wellfound_jobs = parse_wellfound_role(html, source_url, artifact_ref, india_only=india_only)
+    if wellfound_jobs:
+        return wellfound_jobs
+
     # Check if this content is a known career feed (Greenhouse, Lever, Ashby)
     feed_jobs = detect_and_parse_feed(html, source_url, artifact_ref, india_only=india_only)
     if feed_jobs:

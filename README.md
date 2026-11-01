@@ -105,3 +105,5 @@ PYTHONPATH=backend/src .venv/bin/python -m jevscout.application.feed_refresh --d
 ```
 
 The stop is graceful; an in-flight request may finish first. A local lock prevents a second refresh worker using the same data directory, and its schedule survives a worker restart. It does not install a system service or automatically restart when WSL or the session stops. It collects and extracts records but does not run the decision model. Saved snapshots are retained, so disk usage will grow over time. The source list is fixed in `backend/src/jevscout/application/feed_refresh.py` for this first version; change it deliberately rather than pointing the worker at arbitrary sites.
+
+A limited Wellfound saved-page diagnostic is documented in [Wellfound research](docs/wellfound-research.md). Automated collection is not available; the diagnostic uses the environment proxy and the scoped crawler currently disables proxies.

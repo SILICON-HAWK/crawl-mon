@@ -1,68 +1,17 @@
-# Wellfound source access research
+# Wellfound source investigation and diagnostic
 
-Research checked 2026-10-31 against Wellfound's official public pages.
+Updated 2026-11-01 after the user requested a new attempt. This is a limited diagnostic, not a supported automated Wellfound integration.
 
-## Decision
+## What worked
 
-Do not add a Wellfound collector or parser to JEVScout at this time. Wellfound's
-public Terms prohibit copying, disclosing, or distributing site content except
-where expressly permitted, including automated or non-automated harvesting,
-collection, or scraping. The terms also grant automated copying only to public
-search engines for publicly searchable index materials (not caches or
-archives). JEVScout is not operating as a public search engine. The public
-robots file leaves some job pages crawlable, but that is not permission to
-collect and reuse their content under the Terms.
+Wellfound exposes a public role-specific page at `/role/l/software-engineer/india`. One authorized diagnostic request through the environment's configured proxy returned an HTML page containing role links and employer names. The saved-page parser `adapters/sources/wellfound.py` extracted 38 listings, of which 32 matched the project's technical-title filter. The diagnostic was imported as run `a13b3709-095d-446c-af9e-ec956b448087`, with `engine=manual-proxy-diagnostic` recorded in its execution report. This was not an automated Crawlee session.
 
-No documented, public jobs listing API or feed was found in Wellfound's
-official developer/help material. Wellfound's documented remote MCP server at
-`https://wellfound.com/api/mcp` is an OAuth-protected recruiter integration for
-reviewing and acting on applicants. It requires an active Essentials or Recruit
-Pro subscription, a seat, and recruiter permissions. Its described data scope
-is application/candidate information for companies the recruiter may access;
-it is not a public job-discovery API. No authenticated access was attempted.
+The parser uses observed, undocumented page markup. It extracts listing title, employer and link only; salary and location are unknown and are not inferred from the page URL. Markup may change without notice. It is deliberately limited to Wellfound's exact domain and `/role/` or `/location/` pages, and operates on already saved HTML. A strict India-only extraction excludes records whose location is unknown.
 
-Since there is no verified permitted source and no approved fixture set, a
-parser would merely encode an undocumented, unsupported payload assumption.
-The adapter, tests, and parser are intentionally not created. Revisit only if
-Wellfound publishes/authorizes a public job feed or grants written permission
-for JEVScout's collection and reuse.
+## Access and integration gaps
 
-## Verified official evidence
+A bounded Crawlee attempt (run `41fa6db1-44a5-47b5-ad54-d8f7f4cce6f5`) timed out without saving a page. Direct no-proxy access also timed out inside and outside the sandbox, while the environment proxy returned HTTP 200. The scoped Crawlee transport currently disables proxies to enforce destination validation and DNS pinning. Automatically using a proxy would need an adapter design that preserves those controls; don't silently enable environment proxies or bypass access controls.
 
-- [General Terms](https://wellfound.com/terms), section III, clause 4 prohibits
-  copying/distributing content except as expressly permitted, including by
-  harvesting, collection, or scraping. Clause 6 restricts automated access that exceeds human browsing load; it separately grants public search engines permission to copy publicly searchable index material.
-  Sections II and IV also reserve content rights and restrict copying or
-  disclosure.
-- [Wellfound robots.txt](https://wellfound.com/robots.txt) is for `User-agent:
-  *`. It disallows `/_jobs/`, `/search`, `/auth/`, `/u/`, and selected query
-  forms such as `*?role=*` and `*?jobId=*`. It does not disallow every public
-  job page. This is a crawl directive, not an express license to harvest or
-  reuse page contents.
-- [Jobs Terms](https://wellfound.com/terms/jobs), section II, describe the
-  candidate-facing job search as a service accessed through Wellfound and the
-  employer ATS integrations as synchronization functionality. They do not
-  describe a public feed for third-party job discovery.
-- [Connect Wellfound to your AI assistant](https://help.wellfound.com/article/1219-connect-wellfound-to-your-ai-assistant),
-  last updated 2026-10-28, documents `https://wellfound.com/api/mcp` with
-  OAuth. It specifies an eligible recruiter subscription/seat and permissions,
-  and describes reviewing applicants, not harvesting public job listings.
+[Wellfound's General Terms](https://wellfound.com/terms), section III, restrict copying or distributing content, including harvesting and scraping, except as expressly permitted; its [robots file](https://wellfound.com/robots.txt) disallows several paths and query forms. Confirm the applicable authorization before relying on automated collection. Wellfound's documented [MCP integration](https://help.wellfound.com/article/1219-connect-wellfound-to-your-ai-assistant) concerns recruiter-authorized applicant workflows, not a documented candidate-facing job-discovery feed. No authenticated access or CAPTCHA bypass was attempted.
 
-## Future adapter contract
-
-If Wellfound supplies a permitted feed/API and representative payloads, an
-adapter should follow existing source parser conventions:
-
-```python
-parse_wellfound_feed(
-    payload_json: str,
-    source_url: str,
-    artifact_ref: str,
-    india_only: bool = True,
-) -> list[dict[str, Any]]
-```
-
-The registry should dispatch only from documented endpoint identity or a
-verified payload shape. Location and technical-stack filters should preserve
-unknown values instead of treating them as a negative match. This is a future
-contract only; no network access path is currently supported.
+Next steps: clarify source authorization, design and test a scoped proxy-capable transport if needed, collect representative permitted fixtures, and only then add a bounded automated Wellfound source workflow. Preserve unknown location/salary and do not assume a returned page or listing is still open.

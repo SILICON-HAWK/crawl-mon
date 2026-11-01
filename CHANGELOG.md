@@ -25,6 +25,11 @@ Validation: rebuilt app/test images; `docker compose run --rm test` passed all 1
 - Verified image builds, eight real PostgreSQL integration tests, CLI round trips, non-root UID, filesystem smoke check, and database health. The pre-existing intentionally failing regression tests remain unchanged.
 - No background queue, filesystem import, crash-resume guarantee, or external publication is included.
 
+## Wellfound saved-page diagnostic — 2026-11-01
+
+- Added a narrow parser for saved public Wellfound role/location pages; it preserves listing links, employer names and source provenance while leaving unverified salary and location unknown.
+- A user-requested one-page diagnostic through the environment proxy produced 38 listings (32 technical). The scoped Crawlee run and direct no-proxy checks timed out; no automated Wellfound feed was added. See docs/wellfound-research.md for source restrictions and transport limitations.
+
 ## Bounded background feed refresh — 2026-11-01
 
 - Added an opt-in CLI worker for five known public feeds, one source and one page at a time, with persisted deadlines, rate spacing, robots crawl-delay and 24-hour failure backoff. Added status and graceful stop commands. The worker does not make model calls.

@@ -1,3 +1,7 @@
+# Wellfound diagnostic
+
+The user requested another attempt. A single public role page was retrieved through the environment proxy and imported with honest `manual-proxy-diagnostic` provenance as run `a13b3709-095d-446c-af9e-ec956b448087`; its 38 listings include 32 technical, with salary/location unknown. The scoped crawler's direct request timed out. A saved-page parser is implemented, but no automated Wellfound workflow exists. See docs/wellfound-research.md for source terms and proxy security tradeoffs. Existing feed-refresh CLI job should remain running; check its lock before starting another.
+
 # Background feed refresh
 
 The user explicitly chose a CLI job, not a system service. See README and docs/changes/feed-refresh.md. The active worker uses `data/live-trial`; use `--status` to verify the live lock, not the PID saved in the sandbox. `--stop` requests a graceful stop. It collects feeds, not AI decisions; WSL/session shutdown stops it. Snapshots accumulate.
